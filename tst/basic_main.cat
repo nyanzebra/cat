@@ -1,0 +1,14 @@
+import std { io, string, vector }
+
+// comment to ignore
+
+/*
+
+should ignore block too
+
+*/
+
+int64 main(vector<string> args) {
+  std::io::out << "Args: " << args << std::io::endl;
+  std::io::out << "Eval (2 * (3 + 4)** 5)" << (2 * (3 + 4) ** 5) << std::io::endl;
+}

@@ -1,0 +1,23 @@
+import std { io, string, vector }
+
+interface shape {
+public:
+  // constructor forced
+  shape(std::string&); // must implement this constructor in concrete class
+
+  friend std::io::out& operator<<(mutable std::io::out& o, shape& s) {
+    o << s._name;
+    return o;
+  }
+private:
+  std::string _name;
+}
+
+class square defines shape {
+public:
+  square(std::string& name) : _name(name) {}
+}
+
+int64 main(vector<string> args) {
+  std::io::out << square("Not rectangle"s) << std::io::endl;
+}
