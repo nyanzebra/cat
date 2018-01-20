@@ -22,20 +22,20 @@
 #define OR_ENUMS(name, a, b) (ENUM_AS_SIZE(a) | ENUM_AS_SIZE(b))
 #endif
 
-template<typename Enum, typename = std::enable_if_t<std::is_enum_v<Enum>>>
+template<typename Enum, typename = std::enable_if_t<std::is_enum<Enum>::value>>
 bool operator&(Enum a, Enum b) { return AND_ENUMS(Enum, a, b); }
 
-template<typename Enum, typename = std::enable_if_t<std::is_enum_v<Enum>>>
+template<typename Enum, typename = std::enable_if_t<std::is_enum<Enum>::value>>
 bool operator^(Enum a, Enum b) { return XOR_ENUMS(Enum, a, b); }
 
-template<typename Enum, typename = std::enable_if_t<std::is_enum_v<Enum>>>
+template<typename Enum, typename = std::enable_if_t<std::is_enum<Enum>::value>>
 bool operator|(Enum a, Enum b) { return OR_ENUMS(Enum, a, b); }
 
-template<typename Enum, typename = std::enable_if_t<std::is_enum_v<Enum>>>
+template<typename Enum, typename = std::enable_if_t<std::is_enum<Enum>::value>>
 Enum& operator&=(Enum& a, Enum b) { return a = SIZE_AS_ENUM(Enum, AND_ENUMS(Enum, a, b)); }
 
-template<typename Enum, typename = std::enable_if_t<std::is_enum_v<Enum>>>
+template<typename Enum, typename = std::enable_if_t<std::is_enum<Enum>::value>>
 Enum& operator^=(Enum& a, Enum b) { return a = SIZE_AS_ENUM(Enum, XOR_ENUMS(Enum, a, b)); }
 
-template<typename Enum, typename = std::enable_if_t<std::is_enum_v<Enum>>>
+template<typename Enum, typename = std::enable_if_t<std::is_enum<Enum>::value>>
 Enum& operator|=(Enum& a, Enum b) { return a = SIZE_AS_ENUM(Enum, OR_ENUMS(Enum, a, b)); }

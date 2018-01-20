@@ -24,27 +24,27 @@ public:
 private:
 protected:
 public:
-  template<typename T = std::string, typename = std::enable_if_t<std::is_constructible_v<std::string, T>>>
+  template<typename T = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
   scope(T&& module = "") : scope(std::move(module), {}) {}
-  template<typename T = std::string, typename U = std::string, typename = std::enable_if_t<std::is_constructible_v<std::string, T> && std::is_constructible_v<scope, U>>>
+  template<typename T = std::string, typename U = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value && std::is_constructible<scope, U>::value>>
   scope(T&& module, U&& propogated_scope) : _module(std::move(module)) {
     _type_symbols.insert(propogated_scope._type_symbols.begin(),propogated_scope._type_symbols.end());
     _function_symbols.insert(propogated_scope._function_symbols.begin(),propogated_scope._function_symbols.end());
     _variable_symbols.insert(propogated_scope._variable_symbols.begin(),propogated_scope._variable_symbols.end());
   }
 
-  template<typename T, typename = std::enable_if_t<std::is_constructible_v<std::string, T>>>
+  template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
   std::pair<scope_instance, cat::type_entity_ptr>& operator[](T&& key) { return _type_symbols[std::move(key)]; }
-  template<typename T, typename = std::enable_if_t<std::is_constructible_v<std::string, T>>>
+  template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
   std::pair<scope_instance, cat::function_entity_ptr>& operator[](T&& key) { return _function_symbols[std::move(key)]; }
-  template<typename T, typename = std::enable_if_t<std::is_constructible_v<std::string, T>>>
+  template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
   std::pair<scope_instance, cat::variable_entity_ptr>& operator[](T&& key) { return _variable_symbols[std::move(key)]; }
 
-  template<typename T, typename = std::enable_if_t<std::is_constructible_v<std::string, T>>>
+  template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
   const std::pair<scope_instance, cat::type_entity_ptr>& operator[](T&& key) const { return _type_symbols[std::move(key)]; }
-  template<typename T, typename = std::enable_if_t<std::is_constructible_v<std::string, T>>>
+  template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
   const std::pair<scope_instance, cat::function_entity_ptr>& operator[](T&& key) const { return _function_symbols[std::move(key)]; }
-  template<typename T, typename = std::enable_if_t<std::is_constructible_v<std::string, T>>>
+  template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
   const std::pair<scope_instance, cat::variable_entity_ptr>& operator[](T&& key) const { return _variable_symbols[std::move(key)]; }
 };
 // TODO fix

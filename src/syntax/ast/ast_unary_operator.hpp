@@ -13,15 +13,7 @@ public:
 private:
 protected:
 public:
-  template<
-    typename T,
-    typename = std::enable_if_t<
-      std::is_constructible_v<
-        std::string,
-        T
-      >
-    >
-  >
+  template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
   ast_unary_operator(T&& op, std::unique_ptr<ast_expression> rhs) : _operator(std::move(op)), _rhs(std::move(rhs)) {
     assert(gUNARY_OPERATORS.find(_operator) != gUNARY_OPERATORS.end() && "");
   }

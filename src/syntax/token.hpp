@@ -175,7 +175,7 @@ private:
   bool is_operator() const { return is_operator(_value[0]) && _value.size() > 1; }
 protected:
 public:
-  template<typename T, typename U, typename = std::enable_if_t<std::is_constructible_v<std::string, T> && std::is_constructible_v<std::string, U>>>
+  template<typename T, typename U, typename = std::enable_if_t<std::is_constructible<std::string, T>::value && std::is_constructible<std::string, U>::value>>
   token(const size_t line, T&& filename, U&& value) : _line(line), _filename(std::forward<T>(filename)), _value(std::move(value)) {
     if (is_number() || is_hex() || is_octal() || is_binary()) {
       _type = token_type::kNUMBER;
@@ -204,7 +204,7 @@ public:
       _type = token_type::kERROR;
     }
   }
-  template<typename T, typename U, typename = std::enable_if_t<std::is_constructible_v<std::string, T> && std::is_constructible_v<std::string, U>>>
+  template<typename T, typename U, typename = std::enable_if_t<std::is_constructible<std::string, T>::value && std::is_constructible<std::string, U>::value>>
   token(const size_t line, T&& filename, U&& value, const token_type type) : _line(line), _filename(std::move(filename)), _value(std::move(value)), _type(type) {}
 
   friend bool operator==(const token& tok, const token_type type) { return tok.type() == type; }

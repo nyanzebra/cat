@@ -15,9 +15,9 @@ private:
 protected:
 public:
   type_entity() = default;
-  template<typename T, typename = std::enable_if_t<std::is_constructible_v<std::string, T>>>
+  template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
   type_entity(T&& name, const enum type type) : type_entity(std::forward<T>(name), std::forward<T>(name), type) {}
-  template<typename T, typename U, typename = std::enable_if_t<std::is_constructible_v<std::string, T> && std::is_constructible_v<std::string, U>>>
+  template<typename T, typename U, typename = std::enable_if_t<std::is_constructible<std::string, T>::value && std::is_constructible<std::string, U>::value>>
   type_entity(T&& name, U&& global_name, const enum type type) : entity(std::forward<T>(name), std::forward<T>(global_name), type) {}
   type_entity(const function_signature& signature) : type_entity(signature.as_string(), signature.as_string(), type::kFUNCTION) {}
   virtual ~type_entity() = default;

@@ -13,7 +13,7 @@ public:
 private:
 protected:
 public:
-  template<typename T, typename = std::enable_if_t<std::is_constructible_v<std::string, T>>>
+  template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
   ast_function_prototype(T&& name, std::list<std::unique_ptr<ast_expression>>&& args) : _name(std::move(name)), _args(std::move(args)) {}
 
   virtual void print() {

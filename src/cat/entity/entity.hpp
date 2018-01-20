@@ -72,9 +72,9 @@ protected:
   bool is_mutable() const { return _entity_modifiers.is_mutable(); }
   bool is_volatile() const { return _entity_modifiers.is_volatile(); }
 public:
-  template<typename T = std::string, typename U = std::string, typename = std::enable_if_t<std::is_constructible_v<std::string, T> && std::is_constructible_v<std::string, U>>>
+  template<typename T = std::string, typename U = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value && std::is_constructible<std::string, U>::value>>
   entity(T&& name, U&& global_name, const enum type type) : entity(std::forward<T>(name), std::forward<U>(global_name), type, entity_modifiers(modifier::kNONE)) {}
-  template<typename T = std::string, typename U = std::string, typename = std::enable_if_t<std::is_constructible_v<std::string, T> && std::is_constructible_v<std::string, U>>>
+  template<typename T = std::string, typename U = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value && std::is_constructible<std::string, U>::value>>
   entity(T&& name, U&& global_name, const enum type type, const entity_modifiers modifiers) : _name(std::move(name)), _global_name(std::move(global_name)), _type(type), _entity_modifiers(modifiers) {}
   virtual ~entity() = default;
 

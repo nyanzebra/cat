@@ -15,7 +15,7 @@ namespace syntax {
   private:
   protected:
   public:
-    template<typename T, typename U, typename = std::enable_if_t<std::is_constructible_v<std::string, T> && std::is_constructible_v<std::string, U>>>
+    template<typename T, typename U, typename = std::enable_if_t<std::is_constructible<std::string, T>::value && std::is_constructible<std::string, U>::value>>
     ast_variable(T&& name, U&& type, const modifiers modifiers = modifiers::kNONE) : _name(std::move(name)), _type(std::move(type)), _modifiers(modifiers) {}
 
     const std::string& name() const { return _name; }
