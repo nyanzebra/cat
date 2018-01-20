@@ -9,8 +9,9 @@ script:
   - which cmake
   - export COVERALLS_SERVICE_NAME=travis-ci
   - export COVERALLS_REPO_TOKEN=PC6vSUfaLZNXNXQtyzGqzxkgZX13hTxxf
-  - cmake -Bcat/tst/bin -Hcat/tst -DCOVERALLS=ON -DCMAKE_BUILD_TYPE=Debug
+  - cmake -Btst/bin -Htst -DCOVERALLS=ON -DCMAKE_BUILD_TYPE=Debug
   - pwd
+  - ls
   - cd tst/bin
   - make clean
   - make cat
