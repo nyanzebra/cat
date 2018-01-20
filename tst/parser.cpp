@@ -12,6 +12,5 @@ TEST(parse, file) {
 
   syntax::parser p;
   auto res = p.parse(l.tokens());
-
-  res->print();
+  if (res) res->print();
 }
