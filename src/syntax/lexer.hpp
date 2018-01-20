@@ -14,6 +14,7 @@ public:
 private:
   void _lex(std::ifstream&& stream, std::string&& file) {
     if (!stream.is_open()) return;
+    _tokens.clear();
     std::string tok;
     bool is_string = false;
     bool is_char = false;

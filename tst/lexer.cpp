@@ -5,6 +5,12 @@
 #include <list>
 #include <string>
 
+TEST(lex, nothing) {
+  syntax::lexer l;
+
+  ASSERT_EQ(l.tokens().size(), 0);
+}
+
 TEST(lex, file) {
   syntax::lexer l;
   l.lex("/Users/robertbaldwin/Documents/GitHub/cat/tst/basic_main.cat");
@@ -96,4 +102,8 @@ TEST(lex, file) {
     ASSERT_EQ(a_it->value(), *b_it);
     ASSERT_NE(a_it->type(), syntax::token_type::kERROR);
   }
+}
+
+TEST(lex, files) {
+  ASSERT_FALSE(true); // should fail until we have multiple test files ready
 }

@@ -6,6 +6,7 @@ namespace syntax {
 
 class ast_meta_interface : public ast_expression {
 private:
+  
 protected:
 public:
 private:

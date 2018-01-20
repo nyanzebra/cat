@@ -10,7 +10,7 @@ public:
 
   virtual void print() { //TODO: should be able to pretty print with indent
     for (auto it = _expression_sequence.begin(); it != _expression_sequence.end(); ++it) {
-      //it->print();
+      (*it)->print();
     }
   }
   template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer_v<decltype(&Visitor::visit)>>>
