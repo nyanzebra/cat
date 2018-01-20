@@ -3,7 +3,7 @@
 #include <iostream>
 #include <type_traits>
 
-namespace log {
+namespace logger {
 
 // make sure T is a stream object TODO: add colours and <filename, function, line>
 template<typename T, typename = std::enable_if_t<std::is_base_of<std::ostream, T>::value>>

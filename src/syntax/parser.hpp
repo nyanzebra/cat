@@ -13,7 +13,7 @@ class parser {
 private:
   typedef std::list<token> token_list;
   typedef token_list::iterator token_list_iterator;
-  log::logger<std::ostream> _log;
+  logger::logger<std::ostream> _log;
 protected:
 public:
 private:
@@ -36,8 +36,9 @@ protected:
 
   std::unique_ptr<ast_expression> parse_type(token_list_iterator& begin, const token_list_iterator& end) const {
     if (std::distance(begin, end) <= 0) return nullptr;
-    auto result = std::make_unique<ast_type<decltype((*begin))>>(*begin++);
-    return result;
+    //auto result = std::make_unique<ast_type<decltype((*begin))>>(*begin++);
+    // TODO: need to use type &| value to figure out what ast_type to return
+    return nullptr;
   }
 
   std::unique_ptr<ast_expression> parse_parentheses(token_list_iterator& begin, const token_list_iterator& end) const {
