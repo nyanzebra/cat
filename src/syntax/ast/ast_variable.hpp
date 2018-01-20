@@ -26,7 +26,7 @@ namespace syntax {
     const bool is_volatile() const { return static_cast<size_t>(_modifiers) & static_cast<size_t>(modifiers::kVOLATILE); }
 
 
-    template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer_v<decltype(&Visitor::visit)>>>
+    template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>
     typename Visitor::return_type accept(std::unique_ptr<Visitor> visitor) { return visitor->visit(std::make_unique<decltype(this)>(this)); }
   };
 

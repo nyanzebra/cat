@@ -4,7 +4,7 @@
 
 namespace syntax {
 
-template<typename Return, typename Ast, typename = std::enable_if_t<std::is_member_function_pointer_v<decltype(&Ast::accept)>>>
+template<typename Return, typename Ast, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Ast::accept)>::value>>
 class ast_visitor {
 private:
   //llvm::code_generator _code_generator;

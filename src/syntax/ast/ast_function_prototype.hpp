@@ -27,7 +27,7 @@ public:
   const std::string& name() const { return _name; }
   const std::list<std::unique_ptr<ast_expression>>& args() const { return _args; }
 
-  template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer_v<decltype(&Visitor::visit)>>>
+  template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>
   typename Visitor::return_type accept(std::unique_ptr<Visitor> visitor) { return visitor->visit(std::make_unique<decltype(this)>(this)); }
 };
 
