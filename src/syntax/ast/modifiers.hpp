@@ -7,7 +7,7 @@ enum class modifiers : char {
   kMUTABLE = 0x1,
   kEXTERN = 0x2,
   kSTATIC = 0x4,
-  kVOLATILE = 0x8
+  kVOLATILE = 0x8,
 }; // enum modifiers
 
 } // namespace syntax

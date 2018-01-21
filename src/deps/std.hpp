@@ -11,5 +11,6 @@
 #include <fstream>
 #include <string>
 #include <exception>
+#include <functional>
 
 #include <experimental/optional>

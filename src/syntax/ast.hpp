@@ -26,26 +26,6 @@
 
 #include "ast/modifiers.hpp"
 
-#include "ast/type/ast_bool.hpp"
-
-#include "ast/type/ast_byte.hpp"
-
-#include "ast/type/ast_char.hpp"
-#include "ast/type/ast_uchar.hpp"
-
-#include "ast/type/ast_flt32.hpp"
-#include "ast/type/ast_flt64.hpp"
-
-#include "ast/type/ast_int8.hpp"
-#include "ast/type/ast_int16.hpp"
-#include "ast/type/ast_int32.hpp"
-#include "ast/type/ast_int64.hpp"
-
-#include "ast/type/ast_uint8.hpp"
-#include "ast/type/ast_uint16.hpp"
-#include "ast/type/ast_uint32.hpp"
-#include "ast/type/ast_uint64.hpp"
-
 #include "utility/enum.hpp"
 
 namespace syntax {

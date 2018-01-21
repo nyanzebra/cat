@@ -68,6 +68,56 @@ TEST(parse, is_valid_token) {
   ASSERT_FALSE(p.is_valid_token(it, syntax::token_type::kERROR, "cat"));
 }
 
+TEST(parse, parse_type) {
+  test_parser p;
+
+  syntax::token t(0, "test", "flt32");
+  syntax::token u(0, "test", "volatile");
+  syntax::token v(0, "test", "mutable");
+  syntax::token w(0, "test", "static");
+  syntax::token x(0, "test", "extern");
+
+  std::list<syntax::token> l;
+  auto res = p.parse_type(l.cbegin(), l.cend());
+  ASSERT_EQ(res.get(), nullptr);
+
+  auto mods = syntax::modifiers::kNONE;
+  auto t_only = std::make_unique<syntax::ast_type>("flt32", mods);
+  mods &= syntax::modifiers::kMUTABLE;
+  auto tu_only = std::make_unique<syntax::ast_type>("flt32", mods);
+  mods &= syntax::modifiers::kVOLATILE;
+  auto tuv_only = std::make_unique<syntax::ast_type>("flt32", mods);
+  mods &= syntax::modifiers::kSTATIC;
+  auto tuvw_only = std::make_unique<syntax::ast_type>("flt32", mods);
+  mods &= syntax::modifiers::kEXTERN;
+  auto tuvwx_only = std::make_unique<syntax::ast_type>("flt32", mods);
+
+  l.push_back(t);
+  res = p.parse_type(l.cbegin(), l.cend());
+  ASSERT_NE(res, nullptr);
+  EXPECT_EQ(*res, *t_only);
+
+  l.push_back(u);
+  res = p.parse_type(l.cbegin(), l.cend());
+  ASSERT_NE(res, nullptr);
+  EXPECT_EQ(*res, *tu_only);
+
+  l.push_back(v);
+  res = p.parse_type(l.cbegin(), l.cend());
+  ASSERT_NE(res, nullptr);
+  EXPECT_EQ(*res, *tuv_only);
+
+  l.push_back(w);
+  res = p.parse_type(l.cbegin(), l.cend());
+  ASSERT_NE(res, nullptr);
+  EXPECT_EQ(*res, *tuvw_only);
+
+  l.push_back(x);
+  res = p.parse_type(l.cbegin(), l.cend());
+  ASSERT_NE(res, nullptr);
+  EXPECT_EQ(*res, *tuvwx_only);
+}
+
 TEST(parse, file) {
   syntax::lexer l;
   l.lex("/Users/robertbaldwin/Documents/GitHub/cat/tst/basic_main.cat");

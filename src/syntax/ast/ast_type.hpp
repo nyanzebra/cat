@@ -1,32 +1,61 @@
 #pragma once
 
 #include "ast_expression.hpp"
+#include "modifiers.hpp"
 
 #include "deps/std.hpp"
 
 namespace syntax {
 
-template<typename T>
 class ast_type : public ast_expression {
 private:
-  T _value;
+  std::string _name;
+  modifiers _modifiers;
 protected:
 public:
 private:
+  void append_mods() {
+    if (_modifiers & modifiers::kEXTERN) {
+      _name.insert(0, std::string("extern "));
+    }
+    if (_modifiers & modifiers::kSTATIC) {
+      _name.insert(0, std::string("static "));
+    }
+    if (_modifiers & modifiers::kMUTABLE) {
+      _name.insert(0, std::string("mutable "));
+    }
+    if (_modifiers & modifiers::kVOLATILE) {
+      _name.insert(0, std::string("volatile "));
+    }
+  }
 protected:
 public:
-  ast_type(const T& value) : _value(value) {}
-  //ast_type(T&& value) : _value(std::move(value)) {}
+  ast_type(const std::string& name, const modifiers mods) : _name(name), _modifiers(mods) { append_mods(); }
+  template<typename U = std::string, typename = std::enable_if_t<std::is_constructible<std::string, U>::value>>
+  ast_type(U&& name, const modifiers mods) : _name(std::move(name)), _modifiers(mods) { append_mods(); }
   virtual ~ast_type() = default;
 
-  operator T() { return _value; }
-  operator T() const { return _value; }
+  friend bool operator==(const ast_type& lhs, const ast_type& rhs) {
+    if (&lhs == &rhs) return true;
+    if (lhs._name == rhs._name && lhs._modifiers == rhs._modifiers) return true;
+    return false;
+  }
 
-  virtual void print() { std::cout << _value; }
+  friend bool operator==(ast_type&& lhs, ast_type&& rhs) {
+    if (&lhs == &rhs) return true;
+    if (lhs._name == rhs._name && lhs._modifiers == rhs._modifiers) return true;
+    return false;
+  }
 
-  const T& value() const { return _value; }
-  void value(const T& value) { _value = value; }
-  //void value(T&& value) { _value = std::move(value); }
+  operator std::string() { return _name; }
+  operator std::string() const { return _name; }
+
+  virtual void print() { std::cout << _name; }
+
+  const std::string& name() const { return _name; }
+  void name(const std::string& name) { _name = name; }
+  template<typename U = std::string, typename = std::enable_if_t<std::is_constructible<std::string, U>::value>>
+  void name(U&& name) { _name = std::move(name); }
 
   template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>
   typename Visitor::return_type accept(std::unique_ptr<Visitor> visitor) { return visitor->visit(std::make_unique<decltype(this)>(this)); }
