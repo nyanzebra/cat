@@ -13,7 +13,7 @@ TEST(lex, nothing) {
 
 TEST(lex, file) {
   syntax::lexer l;
-  l.lex("/Users/robertbaldwin/Documents/GitHub/cat/tst/basic_main.cat");
+  l.lex("../basic_main.cat");
 
   std::list<std::string> tokens = {
     "import",

@@ -140,7 +140,7 @@ TEST(parse, parse_program) {
 
 TEST(parse, file) {
   syntax::lexer l;
-  l.lex("/Users/robertbaldwin/Documents/GitHub/cat/tst/basic_main.cat");
+  l.lex("../basic_main.cat");
 
   ASSERT_TRUE(l.tokens().size() > 0);
   syntax::parser p;
