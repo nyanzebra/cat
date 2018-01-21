@@ -77,7 +77,7 @@ matrix:
     - os: linux
       sudo: required
     - os: osx
-    - os: windows
+    #- os: windows
 
 compiler:
   - clang++
