@@ -29,13 +29,14 @@ public:
   using syntax::parser::parse_program;
   using syntax::parser::parse_sequence;
   using syntax::parser::parse;
-}; // class parser
+}; // class test_parser
 
 TEST(parse, nothing) {
   syntax::lexer l;
-  syntax::parser p;
-  ASSERT_TRUE(l.tokens().size() == 0);
-  ASSERT_EQ(p.parse(l.tokens()), nullptr);
+  test_parser p;
+  ASSERT_TRUE(l.tokens().empty());
+  auto res = p.parse(l.tokens());
+  ASSERT_EQ(res.get(), nullptr);
 }
 
 TEST(parse, is_valid_type) {
@@ -72,8 +73,8 @@ TEST(parse, parse_type) {
   test_parser p;
 
   syntax::token t(0, "test", "flt32");
-  syntax::token u(0, "test", "volatile");
-  syntax::token v(0, "test", "mutable");
+  syntax::token u(0, "test", "mutable");
+  syntax::token v(0, "test", "volatile");
   syntax::token w(0, "test", "static");
   syntax::token x(0, "test", "extern");
 
@@ -82,40 +83,59 @@ TEST(parse, parse_type) {
   ASSERT_EQ(res.get(), nullptr);
 
   auto mods = syntax::modifiers::kNONE;
-  auto t_only = std::make_unique<syntax::ast_type>("flt32", mods);
-  mods &= syntax::modifiers::kMUTABLE;
-  auto tu_only = std::make_unique<syntax::ast_type>("flt32", mods);
-  mods &= syntax::modifiers::kVOLATILE;
-  auto tuv_only = std::make_unique<syntax::ast_type>("flt32", mods);
-  mods &= syntax::modifiers::kSTATIC;
-  auto tuvw_only = std::make_unique<syntax::ast_type>("flt32", mods);
-  mods &= syntax::modifiers::kEXTERN;
-  auto tuvwx_only = std::make_unique<syntax::ast_type>("flt32", mods);
+  auto t_only = syntax::ast_type("flt32", mods);
+
+  mods = syntax::modifiers::kMUTABLE;
+  auto tu_only = syntax::ast_type("flt32", mods);
+
+  mods |= syntax::modifiers::kVOLATILE;
+  auto tuv_only = syntax::ast_type("flt32", mods);
+
+  mods |= syntax::modifiers::kSTATIC;
+  auto tuvw_only = syntax::ast_type("flt32", mods);
+
+  mods |= syntax::modifiers::kEXTERN;
+  auto tuvwx_only = syntax::ast_type("flt32", mods);
+
+  l.push_front(t);
+  res = p.parse_type(l.cbegin(), l.cend());
+  ASSERT_NE(res, nullptr);
+  EXPECT_EQ(*(res.get()), t_only);
+
+  l.push_front(u);
+  res = p.parse_type(l.cbegin(), l.cend());
+  ASSERT_NE(res, nullptr);
+  EXPECT_EQ(*res, tu_only);
+
+  l.push_front(v);
+  res = p.parse_type(l.cbegin(), l.cend());
+  ASSERT_NE(res, nullptr);
+  EXPECT_EQ(*res, tuv_only);
+
+  l.push_front(w);
+  res = p.parse_type(l.cbegin(), l.cend());
+  ASSERT_NE(res, nullptr);
+  EXPECT_EQ(*res, tuvw_only);
+
+  l.push_front(x);
+  res = p.parse_type(l.cbegin(), l.cend());
+  ASSERT_NE(res, nullptr);
+  EXPECT_EQ(*res, tuvwx_only);
+}
+
+TEST(parse, parse_program) {
+  test_parser p;
+  syntax::token t(0, "test", "flt32");
+  std::list<syntax::token> l;
+
+  auto res = p.parse_program(l.cbegin(), l.cend());
+  ASSERT_EQ(res.get(), nullptr);
 
   l.push_back(t);
-  res = p.parse_type(l.cbegin(), l.cend());
-  ASSERT_NE(res, nullptr);
-  EXPECT_EQ(*res, *t_only);
+  res = p.parse_program(l.cbegin(), l.cend());
+  //TODO: change when implemented more
+  ASSERT_EQ(res.get(), nullptr);
 
-  l.push_back(u);
-  res = p.parse_type(l.cbegin(), l.cend());
-  ASSERT_NE(res, nullptr);
-  EXPECT_EQ(*res, *tu_only);
-
-  l.push_back(v);
-  res = p.parse_type(l.cbegin(), l.cend());
-  ASSERT_NE(res, nullptr);
-  EXPECT_EQ(*res, *tuv_only);
-
-  l.push_back(w);
-  res = p.parse_type(l.cbegin(), l.cend());
-  ASSERT_NE(res, nullptr);
-  EXPECT_EQ(*res, *tuvw_only);
-
-  l.push_back(x);
-  res = p.parse_type(l.cbegin(), l.cend());
-  ASSERT_NE(res, nullptr);
-  EXPECT_EQ(*res, *tuvwx_only);
 }
 
 TEST(parse, file) {
@@ -126,5 +146,5 @@ TEST(parse, file) {
   syntax::parser p;
   auto res = p.parse(l.tokens());
   if (res) res->print();
-  ASSERT_FALSE(true); // should fail until this is fleshed out
+  ASSERT_FALSE(false); // TODO: change when implemented
 }

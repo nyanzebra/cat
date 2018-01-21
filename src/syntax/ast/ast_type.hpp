@@ -15,17 +15,17 @@ protected:
 public:
 private:
   void append_mods() {
-    if (_modifiers & modifiers::kEXTERN) {
-      _name.insert(0, std::string("extern "));
-    }
-    if (_modifiers & modifiers::kSTATIC) {
-      _name.insert(0, std::string("static "));
+    if (_modifiers & modifiers::kVOLATILE) {
+      _name.insert(0, std::string("volatile "));
     }
     if (_modifiers & modifiers::kMUTABLE) {
       _name.insert(0, std::string("mutable "));
     }
-    if (_modifiers & modifiers::kVOLATILE) {
-      _name.insert(0, std::string("volatile "));
+    if (_modifiers & modifiers::kSTATIC) {
+      _name.insert(0, std::string("static "));
+    }
+    if (_modifiers & modifiers::kEXTERN) {
+      _name.insert(0, std::string("extern "));
     }
   }
 protected:

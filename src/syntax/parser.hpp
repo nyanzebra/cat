@@ -3,8 +3,6 @@
 #include "ast.hpp"
 #include "token.hpp"
 
-#include "log/logger.hpp"
-
 #include "deps/std.hpp"
 
 namespace syntax {
@@ -13,7 +11,6 @@ class parser {
 private:
   typedef std::list<token> token_list;
   typedef token_list::const_iterator token_list_iterator;
-  logger::logger<std::ostream> _log;
 protected:
 public:
 private:
@@ -22,23 +19,23 @@ protected:
     if (it->type() == type) {
       return true;
     }
-    _log.error("Type " + gTOKEN_NAMES.at(it->type()) + " is not equal to " + gTOKEN_NAMES.at(type));
+    // TODO: log?
     return false;
   }
   bool is_valid_value(const token_list_iterator it, const std::string& value) const {
     if (it->value() == value) {
       return true;
     }
-    _log.error("Value " + it->value() + " is not equal to " + value);
+    // TODO: log?
     return false;
   }
   bool is_valid_token(const token_list_iterator it, const token_type type, const std::string& value) const { return is_valid_type(it, type) && is_valid_value(it, value); }
 
   std::unique_ptr<ast_type> parse_type(token_list_iterator begin, const token_list_iterator end) const {
     if (std::distance(begin, end) <= 0) return nullptr;
-    modifiers mods;
+    modifiers mods = modifiers::kNONE;
 
-    while (begin->type() == token_type::kTYPE) {
+    while (begin->type() == token_type::kTYPE_MODIFIER) {
       if (begin->value() == "extern") {
         mods |= modifiers::kEXTERN;
       }
@@ -238,17 +235,12 @@ protected:
   }
 public:
   std::unique_ptr<ast_program> parse(const std::list<token>& tokens) const {
-    //TODO: can this be better?
-    return parse(std::move(tokens));
-  }
-  std::unique_ptr<ast_program> parse(std::list<token>&& tokens) const {
     // find a non-kPOSSIBLE_ENTITY token and then read until reach a kPOSSIBLE_ENTITY
     // the set of tokens should make up an expression...
-    auto begin = tokens.begin();
-    auto end = tokens.end();
-    std::cerr << "Parsing..." << std::endl;
+    //auto begin = tokens.begin();
+    //auto end = tokens.end();
     // make expression
-    return parse_program(begin, end);
+    return nullptr;//parse_program(begin, end);
     // need to keep track of imports manually...
     // so need to use the scope objects to hold objects/functions
     // then need to see if have to build imported file

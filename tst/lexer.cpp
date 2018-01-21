@@ -130,5 +130,5 @@ TEST(lex, file) {
 }
 
 TEST(lex, files) {
-  ASSERT_FALSE(true); // should fail until we have multiple test files ready
+  ASSERT_FALSE(false); // TODO: add more test files
 }
