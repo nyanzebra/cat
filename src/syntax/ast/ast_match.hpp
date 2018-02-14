@@ -5,7 +5,7 @@
 namespace syntax {
 
 // need for match
-class ast_arm final : public ast_expression {
+class ast_match final : public ast_expression {
 private:
 protected:
 public:

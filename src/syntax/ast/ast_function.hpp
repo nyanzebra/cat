@@ -16,7 +16,7 @@ protected:
 public:
   ast_function(std::unique_ptr<ast_function_prototype> prototype, std::unique_ptr<ast_block> body) : _prototype(std::move(prototype)), _body(std::move(body)) {}
 
-  virtual void print() {
+  void print() override {
     _prototype->print();
     _body->print();
   }

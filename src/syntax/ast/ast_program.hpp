@@ -4,7 +4,7 @@
 
 namespace syntax {
 
-class ast_program : public ast_node {
+class ast_program final : public ast_node {
 private:
 
 protected:

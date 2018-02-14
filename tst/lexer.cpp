@@ -8,7 +8,7 @@
 TEST(lex, nothing) {
   syntax::lexer l;
 
-  ASSERT_EQ(l.tokens().size(), 0);
+  ASSERT_EQ(0, l.tokens().size());
 }
 
 TEST(lex, file) {
@@ -124,8 +124,8 @@ TEST(lex, file) {
   auto a_it = l.tokens().begin();
   auto b_it = tokens.begin();
   for (auto i = 0u; i < tokens.size(); ++i) {
-    ASSERT_EQ(a_it->value(), *b_it);
-    ASSERT_NE(a_it->type(), syntax::token_type::kERROR);
+    ASSERT_EQ(*b_it, a_it->value());
+    ASSERT_NE(syntax::token_type::kERROR, a_it->type());
   }
 }
 

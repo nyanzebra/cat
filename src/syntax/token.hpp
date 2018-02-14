@@ -2,6 +2,8 @@
 
 #include "keyword.hpp"
 
+#include <algorithm>
+
 namespace syntax {
 
 class token {
@@ -55,9 +57,19 @@ private:
   bool is_number() {
     size_t dot_count = 0;
     for (auto i = (long long)(_value.size() - 1); i >= 0; --i) {
-      if (_value[i] == 'u' && i == _value.size() - 1) continue;
+      if (_value[i] == 'u' && i == _value.size() - 1) {
+        // if 'u' is present it best be an unsigned :)
+        _type = token_type::kUNSIGNED_INTEGER_LITERAL;
+        continue;
+      }
       if (_value[i] < '0' || _value[i] > '9') {
         if (_value[i] == '.') {
+          if (_type == token_type::kUNSIGNED_INTEGER_LITERAL) {
+            _type = token_type::kERROR;
+            return false;
+          }
+          // if '.' it best be a float :)
+          _type = token_type::kFLOAT_LITERAL;
           dot_count++;
           if (dot_count > 1) {
             _type = token_type::kERROR;
@@ -178,7 +190,9 @@ public:
   template<typename T, typename U, typename = std::enable_if_t<std::is_constructible<std::string, T>::value && std::is_constructible<std::string, U>::value>>
   token(const size_t line, T&& filename, U&& value) : _line(line), _filename(std::forward<T>(filename)), _value(std::move(value)) {
     if (is_number() || is_hex() || is_octal() || is_binary()) {
-      _type = token_type::kNUMBER;
+      if (_type != token_type::kUNSIGNED_INTEGER_LITERAL && _type != token_type::kFLOAT_LITERAL) _type = token_type::kINTEGER_LITERAL;
+      auto it = std::remove_if(_value.begin(),_value.end(), [&](char c) { return c == ',' || c == 'u'; });
+      _value.erase(it, _value.end());
     } else if (is_char()) {
       _type = token_type::kCHAR_LITERAL;
     } else if (is_string()) {
@@ -205,7 +219,12 @@ public:
     }
   }
   template<typename T, typename U, typename = std::enable_if_t<std::is_constructible<std::string, T>::value && std::is_constructible<std::string, U>::value>>
-  token(const size_t line, T&& filename, U&& value, const token_type type) : _line(line), _filename(std::move(filename)), _value(std::move(value)), _type(type) {}
+  token(const size_t line, T&& filename, U&& value, const token_type type) : _line(line), _filename(std::move(filename)), _value(std::move(value)), _type(type) {
+    if (type == token_type::kFLOAT_LITERAL || type == token_type::kINTEGER_LITERAL ||type == token_type::kUNSIGNED_INTEGER_LITERAL) {
+      auto it = std::remove_if(_value.begin(),_value.end(), [&](char c) { return c == ',' || c == 'u'; });
+      _value.erase(it, _value.end());
+    }
+  }
 
   friend bool operator==(const token& tok, const token_type type) { return tok.type() == type; }
   friend std::ostream& operator<<(std::ostream& o, const token& tok) {

@@ -1,11 +1,10 @@
 #pragma once
 
-#include "ast_expression.hpp"
+#include "ast_conditional.hpp"
 
 namespace syntax {
 
-// need for match
-class ast_arm final : public ast_expression {
+class ast_while final : public ast_conditional {
 private:
 protected:
 public:
