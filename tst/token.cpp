@@ -3,7 +3,7 @@
 #include "syntax/token.hpp"
 #include "syntax/token_type.hpp"
 
-#include <string>
+#include "deps/std.hpp"
 
 #define EXPECT_TOKEN_EQ(l, f, v, t) \
 {\

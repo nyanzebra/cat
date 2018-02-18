@@ -147,3 +147,9 @@ static const std::unordered_map<token_type, std::string> gTOKEN_NAMES = {
 };
 
 } // namespace syntax
+// 
+//
+// std::ostream& operator<<(std::ostream& o, syntax::token_type token_type) {
+//   o << syntax::gTOKEN_NAMES.at(token_type);
+//   return o;
+// }

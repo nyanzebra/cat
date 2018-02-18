@@ -23,6 +23,7 @@
 #include "ast/ast_pattern.hpp"
 #include "ast/ast_program.hpp"
 #include "ast/ast_range.hpp"
+#include "ast/ast_string.hpp"
 #include "ast/ast_template.hpp"
 #include "ast/ast_try.hpp"
 #include "ast/ast_type.hpp"
