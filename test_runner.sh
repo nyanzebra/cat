@@ -7,5 +7,5 @@ mkdir tst/bin
 cd tst/bin
 cmake ..
 make clean
-make cat
+make cat ARGS=-V
 ./cat;

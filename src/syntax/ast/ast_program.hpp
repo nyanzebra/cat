@@ -4,7 +4,7 @@
 
 namespace syntax {
 
-class ast_program : public ast_node {
+class ast_program final : public ast_node {
 private:
 
 protected:
@@ -12,7 +12,7 @@ public:
 private:
 protected:
 public:
-  virtual void print() {}
+  virtual void print(size_t tabs) {}
 }; // contains compilation nodes
 
 } // namespace syntax

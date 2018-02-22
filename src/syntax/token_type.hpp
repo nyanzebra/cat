@@ -10,7 +10,10 @@ enum class token_type : unsigned long long {
   kPOSSIBLE_ENTITY,
   kERROR,
   // instances
-  kNUMBER, // 1
+  kFLOAT_LITERAL, // 1.0
+  kINTEGER_LITERAL, // 1
+  kUNSIGNED_INTEGER_LITERAL, // 1u
+  kBOOL_LITERAL, // true
   kCHAR_LITERAL, // 'a'
   kSTRING_LITERAL, // "a"
   // delimiter
@@ -49,9 +52,12 @@ enum class token_type : unsigned long long {
   kIF,
   kELSE,
   kMATCH,
+  kARM,
   kFOR,
   kDO,
   kWHILE,
+  kTRY,
+  kCATCH,
   // bool help
   kNOT,
   kOR,
@@ -80,7 +86,10 @@ enum class token_type : unsigned long long {
 static const std::unordered_map<token_type, std::string> gTOKEN_NAMES = {
   { token_type::kPOSSIBLE_ENTITY, "kPOSSIBLE_ENTITY" },
   { token_type::kERROR, "kERROR" },
-  { token_type::kNUMBER, "kNUMBER" },
+  { token_type::kINTEGER_LITERAL, "kINTEGER_LITERAL" },
+  { token_type::kUNSIGNED_INTEGER_LITERAL, "kUNSIGNED_INTEGER_LITERAL" },
+  { token_type::kFLOAT_LITERAL, "kFLOAT_LITERAL" },
+  { token_type::kBOOL_LITERAL, "kBOOL_LITERAL" },
   { token_type::kCHAR_LITERAL, "kCHAR_LITERAL" },
   { token_type::kSTRING_LITERAL, "kSTRING_LITERAL" },
   { token_type::kOPENING_DELIMITER, "kOPENING_DELIMITER" },
@@ -111,6 +120,7 @@ static const std::unordered_map<token_type, std::string> gTOKEN_NAMES = {
   { token_type::kIF, "kIF" },
   { token_type::kELSE, "kELSE" },
   { token_type::kMATCH, "kMATCH" },
+  { token_type::kARM, "kARM" },
   { token_type::kFOR, "kFOR" },
   { token_type::kDO, "kDO" },
   { token_type::kWHILE, "kWHILE" },
@@ -132,6 +142,14 @@ static const std::unordered_map<token_type, std::string> gTOKEN_NAMES = {
   { token_type::kYIELD, "kYIELD" },
   { token_type::kUNSAFE, "kUNSAFE" },
   { token_type::kEND_OF_FILE, "kEND_OF_FILE" },
+  { token_type::kTRY, "kTRY" },
+  { token_type::kCATCH, "kCATCH" },
 };
 
 } // namespace syntax
+// 
+//
+// std::ostream& operator<<(std::ostream& o, syntax::token_type token_type) {
+//   o << syntax::gTOKEN_NAMES.at(token_type);
+//   return o;
+// }

@@ -7,6 +7,9 @@
 namespace syntax {
 
 static const std::unordered_map<std::string, token_type> gKEYWORDS = {
+  // constant
+  { "true", token_type::kBOOL_LITERAL },
+  { "false", token_type::kBOOL_LITERAL },
   // types
   { "void", token_type::kTYPE },
   { "bool", token_type::kTYPE },

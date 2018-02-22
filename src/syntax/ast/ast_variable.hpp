@@ -1,33 +1,41 @@
 #pragma once
 
 #include "ast_expression.hpp"
+#include "ast_type.hpp"
 #include "modifiers.hpp"
 
 namespace syntax {
 
-  // variable
-  class ast_variable : public ast_expression {
-  private:
-    std::string _name, _type;
-    modifiers _modifiers;
-  protected:
-  public:
-  private:
-  protected:
-  public:
-    template<typename T, typename U, typename = std::enable_if_t<std::is_constructible<std::string, T>::value && std::is_constructible<std::string, U>::value>>
-    ast_variable(T&& name, U&& type, const modifiers modifiers = modifiers::kNONE) : _name(std::move(name)), _type(std::move(type)), _modifiers(modifiers) {}
+// variable TODO: add value
+class ast_variable final : public ast_expression {
+private:
+  std::string _name;
+  std::unique_ptr<ast_type> _type;
+  std::unique_ptr<ast_expression> _value;
+protected:
+public:
+private:
+protected:
+public:
+  template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
+  ast_variable(T&& name, std::unique_ptr<ast_type> type, std::unique_ptr<ast_expression> value = nullptr) : _name(std::move(name)), _type(std::move(type)), _value(std::move(value)) {}
 
-    const std::string& name() const { return _name; }
-    const std::string& type() const { return _type; }
-    const bool is_mutable() const { return static_cast<size_t>(_modifiers) & static_cast<size_t>(modifiers::kMUTABLE); }
-    const bool is_extern() const { return static_cast<size_t>(_modifiers) & static_cast<size_t>(modifiers::kEXTERN); }
-    const bool is_static() const { return static_cast<size_t>(_modifiers) & static_cast<size_t>(modifiers::kSTATIC); }
-    const bool is_volatile() const { return static_cast<size_t>(_modifiers) & static_cast<size_t>(modifiers::kVOLATILE); }
+  const std::string& name() const { return _name; }
+  const std::unique_ptr<ast_type>& type() const { return _type; }
+  const std::unique_ptr<ast_expression>& value() const { return _value; }
 
+  void print(size_t tabs) override {
+    _type->print(tabs);
+    std::cout << ' ' << _name;
+    if (_value) {
+      std::cout << " = ";
+      _value->print(0);
+    }
+    std::cout << ';' << std::endl;
+  }
 
-    template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>
-    typename Visitor::return_type accept(std::unique_ptr<Visitor> visitor) { return visitor->visit(std::make_unique<decltype(this)>(this)); }
-  };
+  template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>
+  typename Visitor::return_type accept(std::unique_ptr<Visitor> visitor) { return visitor->visit(std::make_unique<decltype(this)>(this)); }
+};
 
 } // namespace syntax

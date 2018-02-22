@@ -4,7 +4,7 @@
 
 namespace syntax {
 
-class ast_unary_operator : public ast_expression {
+class ast_unary_operator final : public ast_expression {
 private:
   std::string _operator;
   std::unique_ptr<ast_expression> _rhs;
@@ -18,11 +18,10 @@ public:
     assert(gUNARY_OPERATORS.find(_operator) != gUNARY_OPERATORS.end() && "");
   }
 
-  virtual void print() {
+  void print(size_t tabs) override {
     std::cout << _operator;
-    _rhs->print();
+    _rhs->print(0);
   }
-
 
   template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>
   typename Visitor::return_type accept(std::unique_ptr<Visitor> visitor) { return visitor->visit(std::make_unique<decltype(this)>(this)); }

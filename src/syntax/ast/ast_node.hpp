@@ -11,7 +11,7 @@ protected:
 public:
   virtual ~ast_node() = default;
 
-  virtual void print() = 0;
+  virtual void print(size_t tabs) = 0;
 };
 
 } // namespace syntax

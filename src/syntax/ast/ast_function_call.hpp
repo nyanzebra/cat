@@ -4,7 +4,7 @@
 
 namespace syntax {
 
-class ast_function_call : public ast_expression {
+class ast_function_call final : public ast_expression {
 private:
   std::string _callee;
   std::vector<std::unique_ptr<ast_expression>> _args;
@@ -16,10 +16,10 @@ public:
   template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
   ast_function_call(T&& callee, std::vector<std::unique_ptr<ast_expression>>&& args) : _callee(std::move(callee)), _args(std::move(args)) {}
 
-  virtual void print() {
+  void print(size_t tabs) override {
     std::cout << _callee << "(";
     for (auto it = _args.begin(); it != _args.end(); ++it) {
-      (*it)->print();
+      (*it)->print(0);
     }
     std::cout << ")";
   }

@@ -4,14 +4,15 @@
 
 namespace syntax {
 
-class ast_assembly final : public ast_expression {
+// need for match
+class ast_match final : public ast_expression {
 private:
 protected:
 public:
 private:
 protected:
 public:
-  void print(size_t indent) override {}
+  void print(size_t tabs) override {}
 
   template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>
   typename Visitor::return_type accept(std::unique_ptr<Visitor> visitor) { return visitor->visit(std::make_unique<decltype(this)>(this)); }

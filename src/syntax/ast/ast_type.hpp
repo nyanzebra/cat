@@ -7,7 +7,7 @@
 
 namespace syntax {
 
-class ast_type : public ast_expression {
+class ast_type final : public ast_expression {
 private:
   std::string _name;
   modifiers _modifiers;
@@ -50,12 +50,20 @@ public:
   operator std::string() { return _name; }
   operator std::string() const { return _name; }
 
-  virtual void print() { std::cout << _name; }
+  virtual void print(size_t tabs) {
+    indent(tabs);
+    std::cout << _name;
+  }
 
   const std::string& name() const { return _name; }
   void name(const std::string& name) { _name = name; }
   template<typename U = std::string, typename = std::enable_if_t<std::is_constructible<std::string, U>::value>>
   void name(U&& name) { _name = std::move(name); }
+
+  const enum modifiers& modifiers() const { return _modifiers; }
+  void modifiers(const enum modifiers& mods) { _modifiers = mods; }
+  template<typename U = enum modifiers, typename = std::enable_if_t<std::is_convertible<U, enum modifiers>::value>>
+  void modifiers(U&& mods) { _modifiers = std::move(mods); }
 
   template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>
   typename Visitor::return_type accept(std::unique_ptr<Visitor> visitor) { return visitor->visit(std::make_unique<decltype(this)>(this)); }
