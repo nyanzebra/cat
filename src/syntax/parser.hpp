@@ -353,7 +353,7 @@ protected:
   std::unique_ptr<ast_expression> parse_primary(token_list_iterator& begin, const token_list_iterator& end) const {
     if (std::distance(begin, end) <= 0) return nullptr;
     auto tok = *begin;
-    auto res = parse_variable(begin, end);
+    std::unique_ptr<ast_expression> res = std::move(parse_variable(begin, end));
     if (res) return res;
     switch (tok.type()) {
       case token_type::kSTRING_LITERAL:
