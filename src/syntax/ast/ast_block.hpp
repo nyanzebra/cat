@@ -11,10 +11,12 @@ private:
 public:
   ~ast_block() = default;
 
-  void print() override { //TODO: should be able to pretty print with indent
+  void print(size_t indent) override { //TODO: should be able to pretty print with indent
+    std::cout << '{' << std::endl;
     for (auto it = _expressions.begin(); it != _expressions.end(); ++it) {
-      (*it)->print();
+      (*it)->print(indent + 1);
     }
+    std::cout << '}' << std::endl;
   }
 
   void add_expression(std::unique_ptr<ast_expression> expr) { _expressions.push_back(std::move(expr)); }

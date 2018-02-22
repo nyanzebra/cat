@@ -24,7 +24,15 @@ public:
   const std::unique_ptr<ast_type>& type() const { return _type; }
   const std::unique_ptr<ast_expression>& value() const { return _value; }
 
-  void print() override {}
+  void print(size_t tabs) override {
+    _type->print(tabs);
+    std::cout << ' ' << _name;
+    if (_value) {
+      std::cout << " = ";
+      _value->print(0);
+    }
+    std::cout << ';' << std::endl;
+  }
 
   template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>
   typename Visitor::return_type accept(std::unique_ptr<Visitor> visitor) { return visitor->visit(std::make_unique<decltype(this)>(this)); }

@@ -36,7 +36,10 @@ public:
   operator T() { return _value; }
   operator T() const { return _value; }
 
-  virtual void print() { std::cout << _value; }
+  virtual void print(size_t tabs) {
+    indent(tabs);
+    std::is_same<T, bool>::value ? (std::cout << std::boolalpha << _value << std::dec) : (std::cout << _value);
+  }
 
   const T& value() const { return _value; }
   void value(const T& value) { _value = value; }

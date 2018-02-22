@@ -39,8 +39,14 @@ protected:
   std::unique_ptr<ast_bool> parse_bool(token_list_iterator& begin, const token_list_iterator& end) const {
     if (std::distance(begin, end) <= 0) return nullptr;
     if (is_valid_type(begin, token_type::kBOOL_LITERAL)) {
-      if (is_valid_value(begin, "false")) return std::make_unique<ast_bool>(false);
-      if (is_valid_value(begin, "true")) return std::make_unique<ast_bool>(true);
+      if (is_valid_value(begin, "false")) {
+        ++begin; // eat false
+        return std::make_unique<ast_bool>(false);
+      }
+      if (is_valid_value(begin, "true")) {
+        ++begin; // eat true
+        return std::make_unique<ast_bool>(true);
+      }
       //_log.error("Invalid token, somehow a bool literal not of value true or false");
     }
     return nullptr;
@@ -49,7 +55,9 @@ protected:
   std::unique_ptr<ast_char> parse_char(token_list_iterator& begin, const token_list_iterator& end) const {
     if (std::distance(begin, end) <= 0) return nullptr;
     if (is_valid_type(begin, token_type::kCHAR_LITERAL)) {
-      return std::make_unique<ast_char>(begin->value()[1]); // '\'','a', '\''
+      auto res = std::make_unique<ast_char>(begin->value()[1]); // '\'','a', '\''
+      ++begin; // eat
+      return std::move(res);
     }
     return nullptr;
   }
@@ -60,6 +68,7 @@ protected:
       std::stringstream stream(begin->value());
       long long literal;
       stream >> literal;
+      ++begin; // eat
       return std::make_unique<ast_int64>(literal);
     }
     return nullptr;
@@ -71,6 +80,7 @@ protected:
       std::stringstream stream(begin->value());
       unsigned long long literal;
       stream >> literal;
+      ++begin; // eat
       return std::make_unique<ast_int64>(literal);
     }
     return nullptr;
@@ -82,6 +92,7 @@ protected:
       std::stringstream stream(begin->value());
       double literal;
       stream >> literal;
+      ++begin; // eat
       return std::make_unique<ast_flt64>(literal);
     }
     return nullptr;
@@ -90,7 +101,9 @@ protected:
   std::unique_ptr<ast_string> parse_string(token_list_iterator& begin, const token_list_iterator& end) const {
     if (std::distance(begin, end) <= 0) return nullptr;
     if (is_valid_type(begin, token_type::kSTRING_LITERAL)) {
-      return std::make_unique<ast_string>(begin->value());
+      auto res = std::make_unique<ast_string>(begin->value());
+      ++begin; // eat
+      return std::move(res);
     }
     return nullptr;
   }
@@ -98,24 +111,31 @@ protected:
   std::unique_ptr<ast_type> parse_type(token_list_iterator& begin, const token_list_iterator& end) const {
     if (std::distance(begin, end) <= 0) return nullptr;
     auto mods = try_read_modifiers(begin, end);
-    auto value = begin->value();
-    ++begin;
-    auto res = std::make_unique<ast_type>(value, mods);
-    mods = try_read_modifiers(begin, end);
-    if (mods != modifiers::kNONE) {
-      // TODO: mods must come before type! log error here
-      //_log.error("Modifiers must come before type");
+    if (begin->type() == token_type::kTYPE || begin->type() == token_type::kPOSSIBLE_ENTITY) {
+      auto value = begin->value();
+      ++begin;
+      auto res = std::make_unique<ast_type>(value, mods);
+      mods = try_read_modifiers(begin, end);
+      if (mods != modifiers::kNONE) {
+        // TODO: mods must come before type! log error here
+        //_log.error("Modifiers must come before type");
+      }
+      return res;
     }
-    return res;
+    return nullptr;
   }
 
+  // TODO: create a parse conditional function
+  // it should check to see if only one expression is present and that it evaluates a boolean
+  // if more than one exists, make sure assignment is first, then condition, then whatever else
   std::unique_ptr<ast_expression> parse_parentheses(token_list_iterator& begin, const token_list_iterator& end) const {
     if (std::distance(begin, end) <= 0) return nullptr;
     if (!is_valid_token(begin, token_type::kOPENING_DELIMITER, "(")) return nullptr;
     ++begin; // eat '('
     auto value = parse_expression(begin, end);
-    ++begin; // eat ')'
     if (!is_valid_token(begin, token_type::kCLOSING_DELIMITER, ")")) return nullptr;
+    //std::cout << "closing? " << *begin << std::endl;
+    ++begin; // eat ')'
     return value;
   }
 
@@ -219,15 +239,13 @@ protected:
 
   std::unique_ptr<ast_variable> parse_variable(token_list_iterator& begin, const token_list_iterator& end) const {
     if (std::distance(begin, end) <= 0) return nullptr;
-
-    auto type = parse_type(begin, end); // next has to be a type
-
+    auto it = begin;
+    auto type = parse_type(begin, end);
     if (!type) return nullptr;
-
-    auto name_token = *begin++;
-
+    if (begin->type() != token_type::kPOSSIBLE_ENTITY) return nullptr;
+    auto name_token = *begin;
     // TODO: name check here
-
+    ++begin; // eat name?
     // if there is no ( then it must be a variable
     if (is_valid_token(begin, token_type::kTERMINATOR, ";")) {
       ++begin; // eat ';'
@@ -236,6 +254,11 @@ protected:
     if (is_valid_value(begin, "=")) {
       ++begin; // eat '='
       auto val = parse_primary(begin, end); // ; take care of by parse_expression
+      if (!is_valid_token(begin, token_type::kTERMINATOR, ";")) {
+        //log warning?
+        return nullptr;
+      }
+      ++begin; // eat ;
       return std::make_unique<ast_variable>(name_token.value(), std::move(type), std::move(val));
       // we need to assign value to a variable
     }
@@ -286,12 +309,17 @@ protected:
   }
 
   std::unique_ptr<ast_expression> parse_binary_operation_expression(token_list_iterator& begin, const token_list_iterator& end, std::unique_ptr<ast_expression> lhs) const {
-    if (std::distance(begin, end) <= 0) return nullptr;
+    if (std::distance(begin, end) <= 0) return lhs;
     if (!lhs) return nullptr;
-    return nullptr;
+    return std::move(lhs);
   }
 
-  std::unique_ptr<ast_for> parse_for(token_list_iterator& begin, const token_list_iterator& end) const { return nullptr; }
+  std::unique_ptr<ast_for> parse_for(token_list_iterator& begin, const token_list_iterator& end) const {
+    if (std::distance(begin, end) <= 0) return nullptr;
+    if (!is_valid_token(begin, token_type::kFOR, "for")) return nullptr;
+    ++begin; // eat 'for'
+    return nullptr;
+  }
 
   std::unique_ptr<ast_while> parse_while(token_list_iterator& begin, const token_list_iterator& end) const { return nullptr; }
 
@@ -305,14 +333,14 @@ protected:
     if (std::distance(begin, end) <= 0) return nullptr;
     if (!is_valid_token(begin, token_type::kIF, "if")) return nullptr;
 
+    ++begin; // eat 'if'
     auto condition = parse_parentheses(begin, end); // should capture condition
+
     if (!condition) {
       // log error
       return nullptr;
     }
-
     auto then = parse_expression(begin, end);
-
     if (is_valid_token(begin, token_type::kELSE, "else")) {
       ++begin; // eat else
       auto other = parse_expression(begin, end);
@@ -325,7 +353,8 @@ protected:
   std::unique_ptr<ast_expression> parse_primary(token_list_iterator& begin, const token_list_iterator& end) const {
     if (std::distance(begin, end) <= 0) return nullptr;
     auto tok = *begin;
-    if (is_valid_token(begin, token_type::kOPENING_DELIMITER, "{")) return parse_block(begin, end);
+    auto res = parse_variable(begin, end);
+    if (res) return res;
     switch (tok.type()) {
       case token_type::kSTRING_LITERAL:
         return parse_string(begin, end);
@@ -356,11 +385,14 @@ protected:
       case token_type::kCATCH:
         return parse_try(begin, end);
       default:
-        return nullptr;
+        break;
     }
+    if (is_valid_token(begin, token_type::kOPENING_DELIMITER, "{")) return parse_block(begin, end);
+    return nullptr;
   }
 
   std::unique_ptr<ast_expression> parse_expression(token_list_iterator& begin, const token_list_iterator& end) const {
+    if (std::distance(begin, end) <= 0) return nullptr;
     auto lhs = parse_primary(begin, end);
     if (lhs) return parse_binary_operation_expression(begin, end, std::move(lhs));
     return nullptr;
@@ -379,6 +411,7 @@ protected:
         case token_type::kUNION:
         case token_type::kENUM:
         case token_type::kVARIABLE:
+
         case token_type::kEND_OF_FILE:
           return program;
         default:
@@ -391,11 +424,21 @@ protected:
   std::unique_ptr<ast_block> parse_block(token_list_iterator& begin, const token_list_iterator& end) const {
     if (std::distance(begin, end) <= 0) return nullptr; // TODO: add logging mechanism that dumps errors at end of compilation
     if (is_valid_token(begin, token_type::kTERMINATOR, ";")) return nullptr; // cannot create block
-    if (is_valid_token(begin, token_type::kOPENING_DELIMITER, "{")) return nullptr;
+    if (!is_valid_token(begin, token_type::kOPENING_DELIMITER, "{")) return nullptr;
+    ++begin; // eat '{'
     std::unique_ptr<ast_block> block(new ast_block());
-    while (begin++ != end) { // block must look like { code }
-      if (is_valid_token(begin, token_type::kCLOSING_DELIMITER, "}")) { return block; }
-      block->add_expression(std::move(parse_expression(begin, end)));
+    while (begin != end) { // block must look like { code }
+      if (is_valid_token(begin, token_type::kCLOSING_DELIMITER, "}")) {
+        ++begin; // eat '}'
+        return block;
+      }
+      auto expr = parse_expression(begin, end);
+      if (expr) {
+        block->add_expression(std::move(expr));
+      } else {
+        ++begin;
+        // log warning?
+      }
     }
     return nullptr;
   }

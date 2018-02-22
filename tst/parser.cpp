@@ -76,6 +76,7 @@ TEST(parse, is_valid_token) {
 }
 
 TEST(parse, parse_bool) {
+  testing::internal::CaptureStdout();
   test_parser p;
   std::list<syntax::token> l;
   auto start = l.cbegin();
@@ -88,6 +89,10 @@ TEST(parse, parse_bool) {
   res = p.parse_bool(start, l.cend());
   ASSERT_NE(nullptr, res);
   EXPECT_TRUE(res->value());
+  res->print(0);
+  EXPECT_EQ("true", testing::internal::GetCapturedStdout());
+
+  //std::cout << std::flush;
 
   l.clear();
   syntax::token u(0, "test", "false");
@@ -96,6 +101,8 @@ TEST(parse, parse_bool) {
   res = p.parse_bool(start, l.cend());
   ASSERT_NE(nullptr, res);
   EXPECT_FALSE(res->value());
+  res->print(0);
+  //EXPECT_EQ("false", testing::internal::GetCapturedStdout());
 }
 
 TEST(parse, parse_char) {
@@ -340,25 +347,94 @@ TEST(parse, parse_variable) {
   auto cast = dynamic_cast<syntax::ast_flt64*>(res->value().get());
   ASSERT_NE(nullptr, cast);
   EXPECT_EQ(3.14, cast->value());
+  res->print(0);
 }
 
-// TEST(parse, if) {
-//   test_parser p;
-//
-//   std::list<syntax::token> l;
-//
-//   auto res = p.parse_if(l.begin(), l.end());
-//   ASSERT_EQ(nullptr, res);
-//
-//   l.emplace_back(0, "test", "if");
-//   l.emplace_back(0, "test", "(");
-//   l.emplace_back(0, "test", "true");
-//   l.emplace_back(0, "test", ")");
-//
-//   auto expect = std::make_unique<syntax::ast_if>()
-//
-//   ASSERT_NE(nullptr, res)
-// }
+TEST(parse, parentheses) {
+  test_parser p;
+
+  std::list<syntax::token> l;
+
+  auto start = l.cbegin();
+  auto res = p.parse_parentheses(start, l.cend());
+  ASSERT_EQ(nullptr, res);
+
+  l.emplace_back(0, "test", "(");
+  l.emplace_back(0, "test", "true");
+  l.emplace_back(0, "test", ")");
+
+  start = l.cbegin();
+  res = p.parse_parentheses(start, l.cend());
+  ASSERT_NE(nullptr, res);
+  std::unique_ptr<syntax::ast_bool> bool_res = std::make_unique<syntax::ast_bool>(dynamic_cast<syntax::ast_bool*>(res.get()));
+  ASSERT_NE(nullptr, bool_res);
+  EXPECT_TRUE(bool_res->value());
+  res->print(0);
+}
+
+TEST(parse, block) {
+  test_parser p;
+
+  std::list<syntax::token> l;
+
+  auto start = l.cbegin();
+  auto res = p.parse_block(start, l.cend());
+  ASSERT_EQ(nullptr, res);
+
+  l.emplace_back(0, "test", "{");
+  l.emplace_back(0, "test", "bool");
+  l.emplace_back(0, "test", "b");
+  l.emplace_back(0, "test", "=");
+  l.emplace_back(0, "test", "true");
+  l.emplace_back(0, "test", ";");
+  l.emplace_back(0, "test", "}");
+
+  start = l.cbegin();
+  res = p.parse_block(start, l.cend());
+  ASSERT_NE(nullptr, res);
+  res->print(0);
+}
+
+TEST(parse, if) {
+  test_parser p;
+
+  std::list<syntax::token> l;
+
+  auto start = l.cbegin();
+  auto res = p.parse_if(start, l.cend());
+  ASSERT_EQ(nullptr, res);
+
+  l.emplace_back(0, "test", "if");
+  l.emplace_back(0, "test", "(");
+  l.emplace_back(0, "test", "true");
+  l.emplace_back(0, "test", ")");
+  l.emplace_back(0, "test", ";");
+
+  auto expect = std::make_unique<syntax::ast_if>(nullptr, nullptr, nullptr);
+  start = l.cbegin();
+  res = p.parse_if(start, l.cend());
+  ASSERT_NE(nullptr, res);
+  ASSERT_NE(nullptr, res->condition());
+  ASSERT_EQ(nullptr, res->body());
+  ASSERT_EQ(nullptr, res->other());
+  //res->print(); //TODO: fix print?
+
+  l.pop_back();
+  l.emplace_back(0, "test", "{");
+  l.emplace_back(0, "test", "bool");
+  l.emplace_back(0, "test", "b");
+  l.emplace_back(0, "test", "=");
+  l.emplace_back(0, "test", "true");
+  l.emplace_back(0, "test", ";");
+  l.emplace_back(0, "test", "}");
+  start = l.cbegin();
+  res = p.parse_if(start, l.cend());
+  ASSERT_NE(nullptr, res);
+  ASSERT_NE(nullptr, res->condition());
+  ASSERT_NE(nullptr, res->body());
+  ASSERT_EQ(nullptr, res->other());
+  res->print(0);
+}
 
 TEST(parse, parse_program) {
   test_parser p;
@@ -384,6 +460,6 @@ TEST(parse, file) {
   ASSERT_TRUE(l.tokens().size() > 0);
   syntax::parser p;
   auto res = p.parse(l.tokens());
-  if (res) res->print();
+  if (res) res->print(0);
   ASSERT_FALSE(false); // TODO: change when implemented
 }

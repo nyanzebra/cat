@@ -12,7 +12,7 @@ public:
 private:
 protected:
 public:
-  virtual void print() {}
+  virtual void print(size_t tabs) {}
 }; // contains compilation nodes
 
 } // namespace syntax

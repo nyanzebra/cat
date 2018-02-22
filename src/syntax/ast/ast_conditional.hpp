@@ -14,6 +14,9 @@ private:
 protected:
 public:
   ast_conditional(std::unique_ptr<ast_expression> condition, std::unique_ptr<ast_expression> body) : _condition(std::move(condition)), _body(std::move(body)) {}
+
+  const std::unique_ptr<ast_expression>& condition() const { return _condition; }
+  const std::unique_ptr<ast_expression>& body() const { return _body; } 
 };
 
 } // namespace syntax

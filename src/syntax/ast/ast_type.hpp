@@ -50,7 +50,10 @@ public:
   operator std::string() { return _name; }
   operator std::string() const { return _name; }
 
-  virtual void print() { std::cout << _name; }
+  virtual void print(size_t tabs) {
+    indent(tabs);
+    std::cout << _name;
+  }
 
   const std::string& name() const { return _name; }
   void name(const std::string& name) { _name = name; }

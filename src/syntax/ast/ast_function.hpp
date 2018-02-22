@@ -16,9 +16,9 @@ protected:
 public:
   ast_function(std::unique_ptr<ast_function_prototype> prototype, std::unique_ptr<ast_block> body) : _prototype(std::move(prototype)), _body(std::move(body)) {}
 
-  void print() override {
-    _prototype->print();
-    _body->print();
+  void print(size_t tabs) override {
+    _prototype->print(0);
+    _body->print(tabs);
   }
 
   template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>

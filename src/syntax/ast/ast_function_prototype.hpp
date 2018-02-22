@@ -17,10 +17,10 @@ public:
   template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
   ast_function_prototype(T&& name, std::unique_ptr<ast_type>&& ret, std::list<std::unique_ptr<ast_type>>&& args) : _name(std::move(name)), _return(std::move(ret)), _args(std::move(args)) {}
 
-  void print() override {
+  void print(size_t tabs) override {
     std::cout << _name << "(";
     for (auto it = _args.begin(); it != _args.end(); ++it) {
-      (*it)->print();
+      (*it)->print(0);
     }
     std::cout << ")";
   }

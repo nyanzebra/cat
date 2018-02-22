@@ -35,7 +35,7 @@ public:
   operator std::string() { return _value; }
   operator std::string() const { return _value; }
 
-  virtual void print() { std::cout << _value; }
+  virtual void print(size_t tabs) { std::cout << _value; }
 
   const std::string& value() const { return _value; }
   void value(const std::string& value) { _value = value; }

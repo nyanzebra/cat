@@ -18,9 +18,9 @@ public:
     assert(gUNARY_OPERATORS.find(_operator) != gUNARY_OPERATORS.end() && "");
   }
 
-  void print() override {
+  void print(size_t tabs) override {
     std::cout << _operator;
-    _rhs->print();
+    _rhs->print(0);
   }
 
   template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>
