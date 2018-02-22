@@ -3,7 +3,7 @@ language: cpp
 script:
   - which cmake
   - export COVERALLS_SERVICE_NAME=travis-ci
-  - export COVERALLS_REPO_TOKEN=GuAP9eURDHzwOxDWlNPpUMdseKks1tzG4
+  - export COVERALLS_REPO_TOKEN=b4j5lXymFi0e1bC3EkI8CKZaMyURoXFWZ
   - cmake -Btst/bin -Htst -DCOVERALLS=ON -DCMAKE_BUILD_TYPE=Debug
   - pwd
   - ls
