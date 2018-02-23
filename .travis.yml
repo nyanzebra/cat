@@ -1,8 +1,7 @@
 language: cpp
 
 before_script:
-  - export COVERALLS_SERVICE_NAME=travis-pro
-  - export COVERALLS_REPO_TOKEN=aZiLHnmGstSxEOOa5SPw1jfwX9sUwDir8
+  - export CODECOV_TOKEN=5cfca0f2-2ece-4a2e-9f02-5fe479e96813
 
 script:
   - which cmake
