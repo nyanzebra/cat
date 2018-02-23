@@ -13,7 +13,7 @@ script:
   - make cat
   - ./cat
   # Codecov
-  - ./get_code_coverage
+  - ./get_code_coverage.sh
   - codecov
 
 before_install:
