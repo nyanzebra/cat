@@ -13,7 +13,7 @@ script:
   - make cat
   - ./cat
   # Codecov
-  - ./get_code_coverage.sh
+  - /Users/travis/build/nyanzebra/cat/get_code_coverage.sh
   - codecov
 
 before_install:
