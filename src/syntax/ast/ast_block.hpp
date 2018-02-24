@@ -16,7 +16,7 @@ public:
     for (auto it = _expressions.begin(); it != _expressions.end(); ++it) {
       (*it)->print(indent + 1);
     }
-    std::cout << '}' << std::endl;
+    std::cout << '}';
   }
 
   void add_expression(std::unique_ptr<ast_expression> expr) { _expressions.push_back(std::move(expr)); }

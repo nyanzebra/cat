@@ -500,6 +500,23 @@ TEST(parse, if) {
   ASSERT_NE(nullptr, res->body());
   ASSERT_EQ(nullptr, res->other());
   res->print(0);
+
+
+  l.emplace_back(0, "test", "else");
+  l.emplace_back(0, "test", "{");
+  l.emplace_back(0, "test", "bool");
+  l.emplace_back(0, "test", "a");
+  l.emplace_back(0, "test", "=");
+  l.emplace_back(0, "test", "true");
+  l.emplace_back(0, "test", ";");
+  l.emplace_back(0, "test", "}");
+  start = l.cbegin();
+  res = p.parse_if(start, l.cend());
+  ASSERT_NE(nullptr, res);
+  ASSERT_NE(nullptr, res->condition());
+  ASSERT_NE(nullptr, res->body());
+  ASSERT_NE(nullptr, res->other());
+  res->print(0);
 }
 
 TEST(parse, parse_program) {
