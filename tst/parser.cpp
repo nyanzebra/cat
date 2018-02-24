@@ -77,7 +77,7 @@ TEST(parse, is_valid_token) {
 }
 
 TEST(parse, parse_bool) {
-  testing::internal::CaptureStdout();
+  std::stringstream stream;
   test_parser p;
   std::list<syntax::token> l;
   auto start = l.cbegin();
@@ -90,10 +90,9 @@ TEST(parse, parse_bool) {
   res = p.parse_bool(start, l.cend());
   ASSERT_NE(nullptr, res);
   EXPECT_TRUE(res->value());
-  res->print(0);
-  EXPECT_EQ("true", testing::internal::GetCapturedStdout());
-
-  //std::cout << std::flush;
+  res->print(stream);
+  EXPECT_EQ("true", stream.str());
+  stream.str("");
 
   l.clear();
   syntax::token u(0, "test", "false");
@@ -102,8 +101,9 @@ TEST(parse, parse_bool) {
   res = p.parse_bool(start, l.cend());
   ASSERT_NE(nullptr, res);
   EXPECT_FALSE(res->value());
-  res->print(0);
-  //EXPECT_EQ("false", testing::internal::GetCapturedStdout());
+  res->print(stream);
+  EXPECT_EQ("false", stream.str());
+  stream.str("");
 
   l.clear();
   syntax::token v(0, "test", "3.14");
@@ -114,6 +114,7 @@ TEST(parse, parse_bool) {
 }
 
 TEST(parse, parse_char) {
+  std::stringstream stream;
   test_parser p;
   std::list<syntax::token> l;
   auto start = l.cbegin();
@@ -125,7 +126,10 @@ TEST(parse, parse_char) {
   start = l.cbegin();
   res = p.parse_char(start, l.cend());
   ASSERT_NE(nullptr, res);
-  EXPECT_EQ(res->value(), 'a');
+  EXPECT_EQ('a', res->value());
+  res->print(stream);
+  EXPECT_EQ("a", stream.str());
+  stream.str("");
 
   l.clear();
   syntax::token u(0, "test", "\'z\'");
@@ -133,7 +137,10 @@ TEST(parse, parse_char) {
   start = l.cbegin();
   res = p.parse_char(start, l.cend());
   ASSERT_NE(nullptr, res);
-  EXPECT_EQ(res->value(), 'z');
+  EXPECT_EQ('z', res->value());
+  res->print(stream);
+  EXPECT_EQ("z", stream.str());
+  stream.str("");
 
   l.clear();
   syntax::token v(0, "test", "true");
@@ -144,6 +151,7 @@ TEST(parse, parse_char) {
 }
 
 TEST(parse, parse_integer) {
+  std::stringstream stream;
   test_parser p;
   std::list<syntax::token> l;
   auto start = l.cbegin();
@@ -155,7 +163,10 @@ TEST(parse, parse_integer) {
   start = l.cbegin();
   res = p.parse_integer(start, l.cend());
   ASSERT_NE(nullptr, res);
-  EXPECT_EQ(res->value(), 0);
+  EXPECT_EQ(0, res->value());
+  res->print(stream);
+  EXPECT_EQ("0", stream.str());
+  stream.str("");
 
   l.clear();
   syntax::token u(0, "test", "1,000");
@@ -163,7 +174,10 @@ TEST(parse, parse_integer) {
   start = l.cbegin();
   res = p.parse_integer(start, l.cend());
   ASSERT_NE(nullptr, res);
-  EXPECT_EQ(res->value(), 1'000);
+  EXPECT_EQ(1'000, res->value());
+  res->print(stream);
+  EXPECT_EQ("1000", stream.str());
+  stream.str("");
 
   l.clear();
   syntax::token v(0, "test", "true");
@@ -174,6 +188,7 @@ TEST(parse, parse_integer) {
 }
 
 TEST(parse, parse_unsigned_integer) {
+  std::stringstream stream;
   test_parser p;
   std::list<syntax::token> l;
   auto start = l.cbegin();
@@ -373,6 +388,7 @@ TEST(parse, parse_type) {
 }
 
 TEST(parse, parse_variable) {
+  std::stringstream stream;
   test_parser p;
 
   std::list<syntax::token> l;
@@ -395,6 +411,9 @@ TEST(parse, parse_variable) {
   ASSERT_NE(nullptr, res->type());
   EXPECT_EQ(syntax::modifiers::kMUTABLE, res->type()->modifiers());
   ASSERT_EQ(nullptr, res->value());
+  res->print(stream);
+  ASSERT_EQ("mutable flt32 test;\n", stream.str());
+  stream.str("");
 
   syntax::token x(0, "test", "=");
   syntax::token y(0, "test", "3.14");
@@ -413,10 +432,12 @@ TEST(parse, parse_variable) {
   auto cast = dynamic_cast<syntax::ast_flt64*>(res->value().get());
   ASSERT_NE(nullptr, cast);
   EXPECT_EQ(3.14, cast->value());
-  res->print(0);
+  res->print(stream);
+  ASSERT_EQ("mutable flt32 test = 3.14;\n", stream.str());
 }
 
 TEST(parse, parentheses) {
+  std::stringstream stream;
   test_parser p;
 
   std::list<syntax::token> l;
@@ -435,10 +456,12 @@ TEST(parse, parentheses) {
   std::unique_ptr<syntax::ast_bool> bool_res = std::make_unique<syntax::ast_bool>(dynamic_cast<syntax::ast_bool*>(res.get()));
   ASSERT_NE(nullptr, bool_res);
   EXPECT_TRUE(bool_res->value());
-  res->print(0);
+  res->print(stream);
+  ASSERT_EQ("true", stream.str());
 }
 
 TEST(parse, block) {
+  std::stringstream stream;
   test_parser p;
 
   std::list<syntax::token> l;
@@ -458,10 +481,12 @@ TEST(parse, block) {
   start = l.cbegin();
   res = p.parse_block(start, l.cend());
   ASSERT_NE(nullptr, res);
-  res->print(0);
+  res->print(stream);
+  ASSERT_EQ("{\n\tbool b = true;\n}", stream.str());
 }
 
 TEST(parse, if) {
+  std::stringstream stream;
   test_parser p;
 
   std::list<syntax::token> l;
@@ -483,7 +508,9 @@ TEST(parse, if) {
   ASSERT_NE(nullptr, res->condition());
   ASSERT_EQ(nullptr, res->body());
   ASSERT_EQ(nullptr, res->other());
-  //res->print(); //TODO: fix print?
+  res->print(stream);
+  ASSERT_EQ("if (true);\n", stream.str());
+  stream.str("");
 
   l.pop_back();
   l.emplace_back(0, "test", "{");
@@ -499,7 +526,9 @@ TEST(parse, if) {
   ASSERT_NE(nullptr, res->condition());
   ASSERT_NE(nullptr, res->body());
   ASSERT_EQ(nullptr, res->other());
-  res->print(0);
+  res->print(stream);
+  ASSERT_EQ("if (true) {\n\tbool b = true;\n}", stream.str());
+  stream.str("");
 
 
   l.emplace_back(0, "test", "else");
@@ -516,7 +545,8 @@ TEST(parse, if) {
   ASSERT_NE(nullptr, res->condition());
   ASSERT_NE(nullptr, res->body());
   ASSERT_NE(nullptr, res->other());
-  res->print(0);
+  res->print(stream);
+  ASSERT_EQ("if (true) {\n\tbool b = true;\n} else {\n\tbool a = true;\n}", stream.str());
 }
 
 TEST(parse, parse_program) {
@@ -537,12 +567,13 @@ TEST(parse, parse_program) {
 }
 
 TEST(parse, file) {
+  std::stringstream stream;
   syntax::lexer l;
   l.lex("../basic_main.cat");
 
   ASSERT_TRUE(l.tokens().size() > 0);
   syntax::parser p;
   auto res = p.parse(l.tokens());
-  if (res) res->print(0);
+  if (res) res->print(stream);
   ASSERT_FALSE(false); // TODO: change when implemented
 }

@@ -12,7 +12,7 @@ public:
 private:
 protected:
 public:
-  virtual void print(size_t tabs) {}
+  virtual std::ostream& print(std::ostream& stream, size_t tabs = 0) { return stream; }
 }; // contains compilation nodes
 
 } // namespace syntax

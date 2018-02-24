@@ -35,7 +35,10 @@ public:
   operator std::string() { return _value; }
   operator std::string() const { return _value; }
 
-  virtual void print(size_t tabs) { std::cout << _value; }
+  virtual std::ostream& print(std::ostream& stream, size_t tabs = 0) {
+    stream << _value;
+    return stream;
+  }
 
   const std::string& value() const { return _value; }
   void value(const std::string& value) { _value = value; }

@@ -50,9 +50,10 @@ public:
   operator std::string() { return _name; }
   operator std::string() const { return _name; }
 
-  virtual void print(size_t tabs) {
-    indent(tabs);
-    std::cout << _name;
+  virtual std::ostream& print(std::ostream& stream, size_t tabs = 0) {
+    indent(stream, tabs);
+    stream << _name;
+    return stream;
   }
 
   const std::string& name() const { return _name; }

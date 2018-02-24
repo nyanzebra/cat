@@ -16,10 +16,11 @@ public:
   template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
   ast_binary_operator(T&& op, std::unique_ptr<ast_expression> lhs, std::unique_ptr<ast_expression> rhs) : _operator(std::move(op)), _lhs(std::move(lhs)), _rhs(std::move(rhs)) {}
 
-  void print(size_t indent) override {
-    _lhs->print(indent);
-    std::cout << " " << _operator << " ";
-    _rhs->print(0);
+  std::ostream& print(std::ostream& stream, size_t tabs = 0) override {
+    _lhs->print(stream, tabs);
+    stream << " " << _operator << " ";
+    _rhs->print(stream);
+    return stream;
   }
 
   template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>

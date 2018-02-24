@@ -11,7 +11,7 @@ protected:
 public:
   virtual ~ast_node() = default;
 
-  virtual void print(size_t tabs) = 0;
+  virtual std::ostream& print(std::ostream& stream, size_t tabs = 0) = 0;
 };
 
 } // namespace syntax
