@@ -24,14 +24,15 @@ public:
   const std::unique_ptr<ast_type>& type() const { return _type; }
   const std::unique_ptr<ast_expression>& value() const { return _value; }
 
-  void print(size_t tabs) override {
-    _type->print(tabs);
-    std::cout << ' ' << _name;
+  std::ostream& print(std::ostream& stream, size_t tabs = 0) override {
+    _type->print(stream, tabs);
+    stream << ' ' << _name;
     if (_value) {
-      std::cout << " = ";
-      _value->print(0);
+      stream << " = ";
+      _value->print(stream);
     }
-    std::cout << ';' << std::endl;
+    stream << ';' << std::endl;
+    return stream;
   }
 
   template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>

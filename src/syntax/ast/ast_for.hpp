@@ -14,16 +14,17 @@ protected:
 public:
   ast_for(std::unique_ptr<ast_expression> start, std::unique_ptr<ast_expression> condition, std::unique_ptr<ast_expression> end, std::unique_ptr<ast_expression> then) : ast_conditional(std::move(condition), std::move(then)), _start(std::move(start)), _end(std::move(end)) {}
 
-  void print(size_t tabs) override {
-    indent(tabs);
-    std::cout << "for (";
-    _start->print(0);
-    std::cout << "; ";
-    _condition->print(0);
-    std::cout << "; ";
-    _end->print(0);
-    std::cout << ")";
-    _body->print(tabs);
+  std::ostream& print(std::ostream& stream, size_t tabs = 0) override {
+    indent(stream, tabs);
+    stream << "for (";
+    _start->print(stream);
+    stream << "; ";
+    _condition->print(stream);
+    stream << "; ";
+    _end->print(stream);
+    stream << ")";
+    _body->print(stream, tabs);
+    return stream;
   }
 
   template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>

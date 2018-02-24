@@ -6,15 +6,15 @@ namespace syntax {
 
 class ast_expression : public ast_node {
 protected:
-  void indent(size_t tabs) {
+  void indent(std::ostream& stream, size_t tabs) {
     for (auto i = 0u; i < tabs; ++i) {
-      std::cout << '\t';
+      stream << '\t';
     }
   }
 public:
   virtual ~ast_expression() = default;
 
-  virtual void print(size_t tabs) = 0;
+  virtual std::ostream& print(std::ostream& stream, size_t tabs = 0) = 0;
 };
 
 } // namespace syntax

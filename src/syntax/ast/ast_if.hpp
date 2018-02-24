@@ -14,22 +14,23 @@ protected:
 public:
   ast_if(std::unique_ptr<ast_expression> condition, std::unique_ptr<ast_expression> body, std::unique_ptr<ast_expression> other) : ast_conditional(std::move(condition), std::move(body)), _else(std::move(other)) {}
 
-  void print(size_t tabs) override {
+  std::ostream& print(std::ostream& stream, size_t tabs = 0) override {
     if (_condition) {
-      std::cout << "if (";
-      _condition->print(0);
-      std::cout << ")";
+      stream << "if (";
+      _condition->print(stream);
+      stream << ")";
       if (_body) {
-        std::cout << ' ';
-        _body->print(tabs);
+        stream << ' ';
+        _body->print(stream, tabs);
         if (_else) {
-          std::cout << " else ";
-          _else->print(tabs);
+          stream << " else ";
+          _else->print(stream, tabs);
         }
       } else {
-        std::cout << ";" << std::endl;
+        stream << ";" << std::endl;
       }
     }
+    return stream;
   }
 
   const std::unique_ptr<ast_expression>& other() const { return _else; }

@@ -11,12 +11,13 @@ private:
 public:
   ~ast_block() = default;
 
-  void print(size_t indent) override { //TODO: should be able to pretty print with indent
-    std::cout << '{' << std::endl;
+  std::ostream& print(std::ostream& stream, size_t tabs = 0) override { //TODO: should be able to pretty print with indent
+    stream << '{' << std::endl;
     for (auto it = _expressions.begin(); it != _expressions.end(); ++it) {
-      (*it)->print(indent + 1);
+      (*it)->print(stream, tabs + 1);
     }
-    std::cout << '}';
+    stream << '}';
+    return stream;
   }
 
   void add_expression(std::unique_ptr<ast_expression> expr) { _expressions.push_back(std::move(expr)); }
