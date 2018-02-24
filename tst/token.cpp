@@ -11,6 +11,7 @@
   EXPECT_EQ(l, tok.line());\
   EXPECT_EQ(f, tok.filename());\
   EXPECT_EQ(v, tok.value());\
+  EXPECT_EQ(t, tok.type());\
   EXPECT_EQ(syntax::gTOKEN_NAMES.at(t), syntax::gTOKEN_NAMES.at(tok.type()));\
 }
 

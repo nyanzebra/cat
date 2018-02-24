@@ -23,7 +23,7 @@ public:
         std::cout << ' ';
         _body->print(tabs);
         if (_else) {
-          std::cout << "else";
+          std::cout << " else ";
           _else->print(tabs);
         }
       } else {
