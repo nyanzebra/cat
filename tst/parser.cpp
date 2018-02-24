@@ -31,6 +31,7 @@ public:
   using syntax::parser::parse_if;
   using syntax::parser::parse_bool;
   using syntax::parser::parse_char;
+  using syntax::parser::parse_string;
   using syntax::parser::parse_integer;
   using syntax::parser::parse_unsigned_integer;
   using syntax::parser::parse_float;
@@ -103,6 +104,13 @@ TEST(parse, parse_bool) {
   EXPECT_FALSE(res->value());
   res->print(0);
   //EXPECT_EQ("false", testing::internal::GetCapturedStdout());
+
+  l.clear();
+  syntax::token v(0, "test", "3.14");
+  l.push_back(v);
+  start = l.cbegin();
+  res = p.parse_bool(start, l.cend());
+  ASSERT_EQ(nullptr, res);
 }
 
 TEST(parse, parse_char) {
@@ -126,6 +134,13 @@ TEST(parse, parse_char) {
   res = p.parse_char(start, l.cend());
   ASSERT_NE(nullptr, res);
   EXPECT_EQ(res->value(), 'z');
+
+  l.clear();
+  syntax::token v(0, "test", "true");
+  l.push_back(v);
+  start = l.cbegin();
+  res = p.parse_char(start, l.cend());
+  ASSERT_EQ(nullptr, res);
 }
 
 TEST(parse, parse_integer) {
@@ -149,6 +164,13 @@ TEST(parse, parse_integer) {
   res = p.parse_integer(start, l.cend());
   ASSERT_NE(nullptr, res);
   EXPECT_EQ(res->value(), 1'000);
+
+  l.clear();
+  syntax::token v(0, "test", "true");
+  l.push_back(v);
+  start = l.cbegin();
+  res = p.parse_unsigned_integer(start, l.cend());
+  ASSERT_EQ(nullptr, res);
 }
 
 TEST(parse, parse_unsigned_integer) {
@@ -172,6 +194,13 @@ TEST(parse, parse_unsigned_integer) {
   res = p.parse_unsigned_integer(start, l.cend());
   ASSERT_NE(nullptr, res);
   EXPECT_EQ(res->value(), 1'000u);
+
+  l.clear();
+  syntax::token v(0, "test", "true");
+  l.push_back(v);
+  start = l.cbegin();
+  res = p.parse_unsigned_integer(start, l.cend());
+  ASSERT_EQ(nullptr, res);
 }
 
 TEST(parse, parse_float) {
@@ -195,6 +224,43 @@ TEST(parse, parse_float) {
   res = p.parse_float(start, l.cend());
   ASSERT_NE(nullptr, res);
   EXPECT_EQ(res->value(), 2.718281828459045);
+
+  l.clear();
+  syntax::token v(0, "test", "true");
+  l.push_back(v);
+  start = l.cbegin();
+  res = p.parse_float(start, l.cend());
+  ASSERT_EQ(nullptr, res);
+}
+
+TEST(parse, parse_string) {
+  test_parser p;
+  std::list<syntax::token> l;
+  auto start = l.cbegin();
+  auto res = p.parse_string(start, l.cend());
+  ASSERT_EQ(nullptr, res);
+
+  syntax::token t(0, "test", "\"a\"");
+  l.push_back(t);
+  start = l.cbegin();
+  res = p.parse_string(start, l.cend());
+  ASSERT_NE(nullptr, res);
+  EXPECT_EQ(res->value(), "\"a\"");
+
+  l.clear();
+  syntax::token u(0, "test", "\"apple\"");
+  l.push_back(u);
+  start = l.cbegin();
+  res = p.parse_string(start, l.cend());
+  ASSERT_NE(nullptr, res);
+  EXPECT_EQ(res->value(), "\"apple\"");
+
+  l.clear();
+  syntax::token v(0, "test", "true");
+  l.push_back(v);
+  start = l.cbegin();
+  res = p.parse_string(start, l.cend());
+  ASSERT_EQ(nullptr, res);
 }
 
 TEST(parse, try_read_modifiers) {
