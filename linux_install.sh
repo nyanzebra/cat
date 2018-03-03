@@ -2,8 +2,8 @@
 
 #CMAKE
 CMAKE_URL="https://cmake.org/files/v3.9/cmake-3.9.1-Linux-x86_64.tar.gz"
-mkdir cmake && wget --no-check-certificate -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
-export PATH=/tmp/cmake/bin:${PATH}
+mkdir cmake_build && wget --no-check-certificate -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+export PATH=cmake_build/bin:${PATH}
 #CODECOV
 apt-get update && apt-get install -y python-pip
 pip install codecov
@@ -24,7 +24,6 @@ export CXXFLAGS="-isystem ${LLVM_INSTALL}/include/c++/v1"
 export LDFLAGS="-L ${LLVM_INSTALL}/lib -l c++ -l c++abi"
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${LLVM_INSTALL}/lib"
 COVERAGE=gcov
-ls /tmp/
-ls /tmp/cmake/
-ls /tmp/cmake/bin
-CMAKE=/tmp/cmake/bin/cmake
+ls cmake_build/
+ls cmake_build/bin
+CMAKE=cmake_build/bin/cmake
