@@ -32,12 +32,15 @@ COVERAGE=gcov
 cd $CURRENT_DIR
 echo $PATH
 which cmake
-cmake -Btst/bin -Htst -DCMAKE_BUILD_TYPE=Debug
+cmake -B./tst/bin -H./tst -DCMAKE_BUILD_TYPE=Debug
 cd tst/bin
 make clean
 make cat
 ./cat
 cd ../..
 # Codecov
-./get_code_coverage.sh
+for filename in `find ./src | egrep --exclude-dir='./tst' '(\.cpp|\.hpp)'`;
+do
+  $COVERAGE -n -o . $filename > /dev/null;
+done
 codecov
