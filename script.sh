@@ -1,6 +1,7 @@
 #!/bin/bash
 
 which $CMAKE
+mkdir tst/bin
 $CMAKE -Btst/bin -Htst -DCMAKE_BUILD_TYPE=Debug
 pwd
 ls
