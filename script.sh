@@ -1,11 +1,9 @@
 #!/bin/bash
 
-which $CMAKE
-mkdir ./tst/bin
-#$CMAKE -B./tst/bin -H./tst -DCMAKE_BUILD_TYPE=Debug
-cd tst
-$CMAKE .. -DCMAKE_BUILD_TYPE=Debug
-cd bin
+echo $PATH
+which cmake
+cmake -B./tst/bin -H./tst -DCMAKE_BUILD_TYPE=Debug
+cd tst/bin
 make clean
 make cat
 ./cat
