@@ -1,11 +1,11 @@
 #!/bin/bash
 
 which $CMAKE
-mkdir tst/bin
-$CMAKE -Btst/bin -Htst -DCMAKE_BUILD_TYPE=Debug
+mkdir ./tst/bin
 pwd
 ls
 ls ./tst
+$CMAKE -B./tst/bin -H./tst -DCMAKE_BUILD_TYPE=Debug
 cd ./tst/bin
 make clean
 make cat
