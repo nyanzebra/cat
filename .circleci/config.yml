@@ -10,7 +10,7 @@ jobs:
       - image: gcc:latest
     steps:
       - checkout
-      - run: pwd; ls; export CODECOV_TOKEN=5cfca0f2-2ece-4a2e-9f02-5fe479e96813; linux_install.sh; script.sh;
+      - run: pwd; ls; export CODECOV_TOKEN=5cfca0f2-2ece-4a2e-9f02-5fe479e96813; ./linux_install.sh; ./script.sh;
     test:
       post:
         - bash <(curl -s https://codecov.io/bash)
