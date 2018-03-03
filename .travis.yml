@@ -20,6 +20,7 @@ before_install:
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
   - mkdir -p "${DEPS_DIR}"
   - cd "${DEPS_DIR}"
+  - echo "TRAVIS_OS_NAME: $TRAVIS_OS_NAME"
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew install cmake || brew upgrade cmake;
