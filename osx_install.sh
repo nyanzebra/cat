@@ -5,3 +5,4 @@ brew install python || brew upgrade python;
 pip2 install codecov;
 COVERAGE=gcov-7
 CMAKE=cmake
+./script.sh
