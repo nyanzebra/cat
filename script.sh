@@ -2,10 +2,9 @@
 
 which $CMAKE
 mkdir ./tst/bin
-pwd
-ls
-ls ./tst
-$CMAKE -B./tst/bin -H./tst -DCMAKE_BUILD_TYPE=Debug
+#$CMAKE -B./tst/bin -H./tst -DCMAKE_BUILD_TYPE=Debug
+cd tst
+$CMAKE -DCMAKE_BUILD_TYPE=Debug
 cd ./tst/bin
 make clean
 make cat
