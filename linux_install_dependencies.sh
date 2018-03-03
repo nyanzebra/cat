@@ -2,8 +2,9 @@
 
 #CMAKE
 CMAKE_URL="https://cmake.org/files/v3.9/cmake-3.9.1-Linux-x86_64.tar.gz"
-mkdir cmake_build && wget --no-check-certificate -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake_build
-export PATH=$(pwd)/cmake_build/bin:${PATH}
+mkdir /tmp/cmake_build && wget --no-check-certificate -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C /tmp/cmake_build
+#export PATH=$(pwd)/cmake_build/bin:${PATH}
+export PATH=/tmp/cmake_build/bin:${PATH}
 #CODECOV
 apt-get update && apt-get install -y python-pip
 pip install codecov
