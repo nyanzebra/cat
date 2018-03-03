@@ -6,11 +6,16 @@ jobs:
         - master
         - develop
         - feature/*
+    dependencies:
+      pre: |
+            export CODECOV_TOKEN=5cfca0f2-2ece-4a2e-9f02-5fe479e96813;
+            ./linux_install_dependencies.sh;
+            export PATH="$(pwd)/cmake_build/bin:$PATH";
     docker:
       - image: gcc:latest
     steps:
       - checkout
-      - run: export CODECOV_TOKEN=5cfca0f2-2ece-4a2e-9f02-5fe479e96813; ./linux_install_dependencies.sh;export PATH="$(pwd)/cmake_build/bin:$PATH"; ./script.sh;
+      - run: ./script.sh;
     test:
       post:
         - bash <(curl -s https://codecov.io/bash)
