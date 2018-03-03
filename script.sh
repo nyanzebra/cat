@@ -4,7 +4,8 @@ which $CMAKE
 $CMAKE -Btst/bin -Htst -DCMAKE_BUILD_TYPE=Debug
 pwd
 ls
-cd tst/bin
+ls ./tst
+cd ./tst/bin
 make clean
 make cat
 ./cat
