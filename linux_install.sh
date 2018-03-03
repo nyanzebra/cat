@@ -1,6 +1,7 @@
 #!/bin/bash
 
 #CMAKE
+echo $DEPS_DIR
 CMAKE_URL="https://cmake.org/files/v3.9/cmake-3.9.1-Linux-x86_64.tar.gz"
 mkdir cmake && wget --no-check-certificate -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
 export PATH=${DEPS_DIR}/cmake/bin:${PATH}
