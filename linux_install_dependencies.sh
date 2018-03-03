@@ -24,4 +24,3 @@ export CXXFLAGS="-isystem ${LLVM_INSTALL}/include/c++/v1"
 export LDFLAGS="-L ${LLVM_INSTALL}/lib -l c++ -l c++abi"
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${LLVM_INSTALL}/lib"
 COVERAGE=gcov
-CMAKE=cmake
