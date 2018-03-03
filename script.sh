@@ -1,7 +1,7 @@
 #!/bin/bash
 
-which $CMAKE
-$CMAKE -Btst/bin -Htst -DCMAKE_BUILD_TYPE=Debug
+which cmake
+cmake -Btst/bin -Htst -DCMAKE_BUILD_TYPE=Debug
 pwd
 ls
 ls ./tst

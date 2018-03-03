@@ -3,10 +3,7 @@
 #CMAKE
 CMAKE_URL="https://cmake.org/files/v3.9/cmake-3.9.1-Linux-x86_64.tar.gz"
 mkdir cmake_build && wget --no-check-certificate -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake_build
-export PATH=cmake_build/bin:${PATH}
-ls cmake_build/
-ls cmake_build/bin
-CMAKE=cmake_build/bin/cmake
+export PATH=$(pwd)/cmake_build/bin:${PATH}
 #CODECOV
 apt-get update && apt-get install -y python-pip
 pip install codecov
@@ -20,7 +17,7 @@ mkdir -p llvm llvm/build llvm/projects/libcxx llvm/projects/libcxxabi
 wget -O - ${LLVM_URL} | tar --strip-components=1 -xJ -C llvm
 wget -O - ${LIBCXX_URL} | tar --strip-components=1 -xJ -C llvm/projects/libcxx
 wget -O - ${LIBCXXABI_URL} | tar --strip-components=1 -xJ -C llvm/projects/libcxxabi
-(cd llvm/build && $CMAKE .. -DCMAKE_INSTALL_PREFIX=${LLVM_INSTALL})
+(cd llvm/build && cmake .. -DCMAKE_INSTALL_PREFIX=${LLVM_INSTALL})
 (cd llvm/build/projects/libcxx && make install -j2)
 (cd llvm/build/projects/libcxxabi && make install -j2)
 export CXXFLAGS="-isystem ${LLVM_INSTALL}/include/c++/v1"
