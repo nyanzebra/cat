@@ -1,0 +1,31 @@
+jobs:
+  build:
+    macos:
+      xcode: "9.2"
+    steps:
+      - checkout
+      - run:
+          name: Install CMAKE
+          command: brew install cmake || brew upgrade cmake
+      - run:
+          name: Install PYTHON
+          command: brew install python || brew upgrade python;
+      - run:
+          name: Install CODECOV
+          command: pip2 install codecov
+      - run:
+          name: Execute Tests
+          command: |
+                    which cmake
+                    cmake -Btst/bin -Htst -DCMAKE_BUILD_TYPE=Debug
+                    pwd
+                    ls
+                    cd tst/bin
+                    make clean
+                    make cat
+                    ./cat
+      - run:
+          name: Run CODECOV
+          command: |
+                    /Users/travis/build/nyanzebra/cat/get_code_coverage.sh
+                    codecov
