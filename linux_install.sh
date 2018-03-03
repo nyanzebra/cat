@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 #CMAKE
 CMAKE_URL="https://cmake.org/files/v3.9/cmake-3.9.1-Linux-x86_64.tar.gz"
