@@ -14,6 +14,8 @@ private:
   typedef token_list::const_iterator token_list_iterator;
   typedef token_list::iterator mutable_token_list_iterator;
 
+  //typedef std::stack<scope> scopes;
+  //scopes _scopes;
   //output::logger //_log;
 protected:
 public:
@@ -134,7 +136,6 @@ protected:
     ++begin; // eat '('
     auto value = parse_expression(begin, end);
     if (!is_valid_token(begin, token_type::kCLOSING_DELIMITER, ")")) return nullptr;
-    //std::cout << "closing? " << *begin << std::endl;
     ++begin; // eat ')'
     return value;
   }
@@ -174,6 +175,10 @@ protected:
       }
     }
     return mods;
+  }
+
+  std::unique_ptr<ast_function_call> parse_function_call(token_list_iterator& begin, const token_list_iterator& end) const {
+    return nullptr;
   }
 
   std::unique_ptr<ast_function_prototype> parse_function_prototype(token_list_iterator& begin, const token_list_iterator& end, const token& name, std::unique_ptr<ast_type> ret) const {
@@ -308,6 +313,7 @@ protected:
     return nullptr;
   }
 
+  // need to see if lhs is null then see if unary operator if not see if binary
   std::unique_ptr<ast_expression> parse_binary_operation_expression(token_list_iterator& begin, const token_list_iterator& end, std::unique_ptr<ast_expression> lhs) const {
     if (std::distance(begin, end) <= 0) return lhs;
     if (!lhs) return nullptr;
@@ -316,9 +322,27 @@ protected:
 
   std::unique_ptr<ast_for> parse_for(token_list_iterator& begin, const token_list_iterator& end) const {
     if (std::distance(begin, end) <= 0) return nullptr;
-    if (!is_valid_token(begin, token_type::kFOR, "for")) return nullptr;
-    ++begin; // eat 'for'
     return nullptr;
+    // if (!is_valid_token(begin, token_type::kFOR, "for")) return nullptr;
+    // ++begin; // eat 'for'
+    // ++begin; // eat '('
+    // auto start = parse_variable(begin, end);
+    // if (!start) {
+    //   // log error
+    //   return nullptr;
+    // }
+    // auto condition = parse_binary_operation_expression(begin, end, nullptr);
+    // if (!condition) {
+    //   // log error
+    //   return nullptr;
+    // }
+    // auto term = parse_binary_operation_expression(begin, end, nullptr);
+    // if (!term) {
+    //   // log error
+    //   return nullptr;
+    // }
+    // auto body = parse_block(begin, end);
+    // return std::make_unique<ast_for>(start, condition, term, body);
   }
 
   std::unique_ptr<ast_while> parse_while(token_list_iterator& begin, const token_list_iterator& end) const { return nullptr; }
@@ -443,6 +467,10 @@ protected:
     return nullptr;
   }
 public:
+  parser() {
+    //_scopes.push(gSCOPE);
+  }
+
   std::unique_ptr<ast_program> parse(const std::list<token>& tokens) const {
     // find a non-kPOSSIBLE_ENTITY token and then read until reach a kPOSSIBLE_ENTITY
     // the set of tokens should make up an expression...

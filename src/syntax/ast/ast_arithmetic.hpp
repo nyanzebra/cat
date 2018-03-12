@@ -16,7 +16,8 @@ public:
 private:
 protected:
 public:
-  ast_arithmetic(const T& value) : _value(value) {}
+  template<typename U = T, typename = std::enable_if_t<std::is_constructible<T, U>::value>>
+  ast_arithmetic(const U& value) : _value(value) {}
   template<typename U = T, typename = std::enable_if_t<std::is_constructible<T, U>::value>>
   ast_arithmetic(U&& value) : _value(std::move(value)) {}
   virtual ~ast_arithmetic() = default;
