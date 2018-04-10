@@ -3,9 +3,16 @@
 #include "syntax/lexer.hpp"
 #include "syntax/parser.hpp"
 
-#include <list>
-#include <string>
-#include <iostream>
+#include "deps/std.hpp"
+
+// bool expect_output(std::string expect, std::function<void()> fn) {
+//   testing::internal::CaptureStdout();
+//   fn();
+//   std::string actual = testing::internal::GetCapturedStdout();
+//   EXTECT_EQ(expect, actual)
+// }
+//
+// #define EXPECT_OUTPUT(expect, fn) expect_output(expect, fn);
 
 class test_parser : public syntax::parser {
 private:
@@ -298,7 +305,6 @@ TEST(parse, try_read_modifiers) {
 
   l.push_back(u);
   mods = syntax::modifiers::kMUTABLE;
-  EXPECT_EQ(true, p.is_valid_value(l.begin(), "mutable"));
   start = l.cbegin();
   res = p.try_read_modifiers(start, l.cend());
   EXPECT_EQ(mods, res);
@@ -549,6 +555,14 @@ TEST(parse, if) {
   ASSERT_EQ("if (true) {\n\tbool b = true;\n} else {\n\tbool a = true;\n}", stream.str());
 }
 
+TEST(parse, function) {
+  // test_parser p;
+  //
+  // std::list<syntax::token> l;
+  // auto res = p.parse_function_prototype(l.begin(), l.end());
+  // ASSERT_EQ(nullptr, res);
+}
+
 TEST(parse, parse_program) {
   test_parser p;
   syntax::token t(0, "test", "flt32");
@@ -562,7 +576,7 @@ TEST(parse, parse_program) {
   start = l.cbegin();
   res = p.parse_program(start, l.cend());
   //TODO: change when implemented more
-  ASSERT_EQ(nullptr, res);
+  ASSERT_FALSE(false);
 
 }
 
@@ -570,10 +584,10 @@ TEST(parse, file) {
   std::stringstream stream;
   syntax::lexer l;
   l.lex("../basic_main.cat");
-
   ASSERT_TRUE(l.tokens().size() > 0);
   syntax::parser p;
   auto res = p.parse(l.tokens());
   if (res) res->print(stream);
+  std::cout << stream.str() << std::endl;
   ASSERT_FALSE(false); // TODO: change when implemented
 }

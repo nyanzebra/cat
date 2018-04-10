@@ -1,6 +1,7 @@
 // standard
 #include <exception>
 #include <fstream>
+#include <sstream>
 #include <functional>
 #include <iostream>
 #include <list>

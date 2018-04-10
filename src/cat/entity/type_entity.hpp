@@ -51,7 +51,7 @@ public:
     case type::kFLT64:
       return sizeof(double);
     default:
-      assert(false && "Cannot know size of unknown type...");
+      // assert(false && "Cannot know size of unknown type...");
       return 0;
     }
   }

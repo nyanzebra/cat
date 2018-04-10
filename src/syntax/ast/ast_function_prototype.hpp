@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ast_expression.hpp"
+#include "ast_type.hpp"
 
 namespace syntax {
 
@@ -18,7 +19,8 @@ public:
   ast_function_prototype(T&& name, std::unique_ptr<ast_type>&& ret, std::list<std::unique_ptr<ast_type>>&& args) : _name(std::move(name)), _return(std::move(ret)), _args(std::move(args)) {}
 
   std::ostream& print(std::ostream& stream, size_t tabs = 0) override {
-    stream << _name << "(";
+    _return->print(stream);
+    stream << " " << _name << "(";
     for (auto it = _args.begin(); it != _args.end(); ++it) {
       (*it)->print(stream);
     }
@@ -28,9 +30,10 @@ public:
 
   const std::string& name() const { return _name; }
   const std::list<std::unique_ptr<ast_type>>& args() const { return _args; }
+  const std::unique_ptr<ast_type>& result() const { return _return; }
 
-  template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>
-  typename Visitor::return_type accept(std::unique_ptr<Visitor> visitor) { return visitor->visit(std::make_unique<decltype(this)>(this)); }
+
+  void* accept(code_generator_visitor* visitor, const scope& current_scope) override;
 };
 
 } // namespace syntax

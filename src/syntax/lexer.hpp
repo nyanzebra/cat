@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "token.hpp"
 
 namespace syntax {
@@ -13,7 +11,10 @@ protected:
 public:
 private:
   void _lex(std::ifstream&& stream, std::string&& file) {
-    if (!stream.is_open()) return;
+    if (!stream.is_open()) {
+      std::cout << "Couldn't open file!";
+      return;
+    }
     _tokens.clear();
     std::string tok;
     bool is_string = false;
@@ -26,14 +27,14 @@ private:
         {
           if (stream.peek() == '/') { // single line comments
             stream >> std::noskipws >> c;
-            stream >> std::noskipws >> c;
+            stream >> std::noskipws >> c; // char after '/'
             while ((c != '\n' && c != '\r')) stream >> std::noskipws >> c;
             stream >> std::noskipws >> c; // skip \n or \r
             continue;
           }
           if (stream.peek() == '*') { // multi line comments
             stream >> std::noskipws >> c;
-            stream >> std::noskipws >> c;
+            stream >> std::noskipws >> c; // char after '*'
             while ((c != '*' && stream.peek() != '/')) stream >> std::noskipws >> c;
             stream >> std::noskipws >> c; // skip last char of block comment
             continue;
@@ -161,18 +162,23 @@ private:
 protected:
 public:
   void lex(std::list<std::string>&& files) {
-    assert(files.size() > 0 && "Must have at least 1 file to lex for compiling...");
+    // assert(files.size() > 0 && "Must have at least 1 file to lex for compiling...");
     for (auto file : files) {
       lex(std::forward<std::string>(file));
     }
   }
 
   void lex(std::string&& file) {
-    assert(file.size() > 0 && "Must lex non-empty file");
+    // assert(file.size() > 0 && "Must lex non-empty file");
     _lex(std::ifstream(std::forward<std::string>(file)), std::forward<std::string>(file));
   }
 
-  const std::list<token>& tokens() const { /*for (auto tok : _tokens) {std::cout << "token: " << '\'' << tok << '\'' << std::endl;}*/ return _tokens; }
+  const std::list<token>& tokens() const {
+    if (_tokens.empty()) {
+      std::cout << "Couldn't read code from file" << std::endl;
+    }
+    return _tokens;
+   }
 };
 
 } // namespace syntax

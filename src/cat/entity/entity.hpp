@@ -92,7 +92,7 @@ public:
       //return sizeof(auto); TODO: need to have real size
     case type::kPATTERN:
     default:
-      assert(false && "Cannot know size of unknown type...");
+      // assert(false && "Cannot know size of unknown type...");
       return 0;
     }
   }

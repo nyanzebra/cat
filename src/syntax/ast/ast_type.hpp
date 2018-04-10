@@ -3,6 +3,8 @@
 #include "ast_expression.hpp"
 #include "modifiers.hpp"
 
+#include "utility/enum.hpp"
+
 #include "deps/std.hpp"
 
 namespace syntax {
@@ -50,7 +52,7 @@ public:
   operator std::string() { return _name; }
   operator std::string() const { return _name; }
 
-  virtual std::ostream& print(std::ostream& stream, size_t tabs = 0) {
+  std::ostream& print(std::ostream& stream, size_t tabs = 0) override {
     indent(stream, tabs);
     stream << _name;
     return stream;
@@ -66,8 +68,7 @@ public:
   template<typename U = enum modifiers, typename = std::enable_if_t<std::is_convertible<U, enum modifiers>::value>>
   void modifiers(U&& mods) { _modifiers = std::move(mods); }
 
-  template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>
-  typename Visitor::return_type accept(std::unique_ptr<Visitor> visitor) { return visitor->visit(std::make_unique<decltype(this)>(this)); }
+  void* accept(code_generator_visitor* visitor, const scope& current_scope) override;
 };
 
 } // namespace syntax

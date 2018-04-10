@@ -2,6 +2,7 @@
 
 #include "ast.hpp"
 #include "token.hpp"
+#include "scope.hpp"
 
 #include "deps/std.hpp"
 #include "output/logger.hpp"
@@ -12,11 +13,10 @@ class parser {
 private:
   typedef std::list<token> token_list;
   typedef token_list::const_iterator token_list_iterator;
-  typedef token_list::iterator mutable_token_list_iterator;
 
-  //typedef std::stack<scope> scopes;
-  //scopes _scopes;
-  //output::logger //_log;
+  typedef std::stack<scope> scopes;
+  scopes _scopes;
+  output::logger _log;
 protected:
 public:
 private:
@@ -25,14 +25,12 @@ protected:
     if (it->type() == type) {
       return true;
     }
-    //_log.warning("Invalid type ", gTOKEN_NAMES.at(it->type()), " was expecting ", gTOKEN_NAMES.at(type));
     return false;
   }
   bool is_valid_value(const token_list_iterator it, std::string value) const {
     if (it->value() == value) {
       return true;
     }
-    //_log.warning("Invalid value ", it->value(), " was expecting ", value);
     return false;
   }
   template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
@@ -49,7 +47,7 @@ protected:
         ++begin; // eat true
         return std::make_unique<ast_bool>(true);
       }
-      //_log.error("Invalid token, somehow a bool literal not of value true or false");
+      _log.error("Invalid token, somehow a bool literal not of value true or false");
     }
     return nullptr;
   }
@@ -119,8 +117,7 @@ protected:
       auto res = std::make_unique<ast_type>(value, mods);
       mods = try_read_modifiers(begin, end);
       if (mods != modifiers::kNONE) {
-        // TODO: mods must come before type! log error here
-        //_log.error("Modifiers must come before type");
+        _log.error("Type modifiers must come before type");
       }
       return res;
     }
@@ -146,32 +143,35 @@ protected:
     while (is_valid_type(begin, token_type::kTYPE_MODIFIER)) {
       if (is_valid_value(begin, "volatile")) {
         if (mods & modifiers::kVOLATILE) {
-          // log warning
-          //_log.warning("");
+          _log.warning("Modifier volatile found twice");
         }
         mods |= modifiers::kVOLATILE;
         ++begin;
+        continue;
       }
       if (is_valid_value(begin, "extern")) {
         if (mods & modifiers::kEXTERN) {
-          // log warning
+          _log.warning("Modifier extern found twice");
         }
         mods |= modifiers::kEXTERN;
         ++begin;
+        continue;
       }
       if (is_valid_value(begin, "static")) {
         if (mods & modifiers::kSTATIC) {
-          // log warning
+          _log.warning("Modifier static found twice");
         }
         mods |= modifiers::kSTATIC;
         ++begin;
+        continue;
       }
       if (is_valid_value(begin, "mutable")) {
         if (mods & modifiers::kMUTABLE) {
-          // log warning
+          _log.warning("Modifier mutable found twice");
         }
         mods |= modifiers::kMUTABLE;
         ++begin;
+        continue;
       }
     }
     return mods;
@@ -181,9 +181,13 @@ protected:
     return nullptr;
   }
 
-  std::unique_ptr<ast_function_prototype> parse_function_prototype(token_list_iterator& begin, const token_list_iterator& end, const token& name, std::unique_ptr<ast_type> ret) const {
-    if (std::distance(begin, end) <= 0) return nullptr;
+  std::unique_ptr<ast_function_prototype> parse_function_prototype(token_list_iterator& begin, const token_list_iterator& end, const std::string& name, std::unique_ptr<ast_type> ret) const {
+    if (std::distance(begin, end) <= 0) {
+      _log.error("Trying to parse a function prototype without remaining tokens");
+      return nullptr;
+    }
     if (is_valid_token(begin, token_type::kOPENING_DELIMITER, "(")) { // we have a function!
+      ++begin; // eat "("
       auto it_begin = begin;
       auto it_end = it_begin;
       std::list<std::unique_ptr<ast_type>> args;
@@ -201,89 +205,90 @@ protected:
         it_begin = it_end;
       }
 
-      return std::make_unique<ast_function_prototype>(std::move(name.value()), std::move(ret), std::move(args));
+      if (is_valid_token(it_end, token_type::kCLOSING_DELIMITER, ")")) ++begin;
+
+      return std::make_unique<ast_function_prototype>(name, std::move(ret), std::move(args));
     } else { // it must be a variable, we return null here because variable will be made elsewhere
       return nullptr;
     }
   }
 
-  std::unique_ptr<ast_function> parse_function(token_list_iterator& begin, const token_list_iterator& end, const token& name, std::unique_ptr<ast_type> ret) const {
+  std::unique_ptr<ast_function> parse_function(token_list_iterator& begin, const token_list_iterator& end) const {
     // TODO
-    if (std::distance(begin, end) <= 0) return nullptr;
-    if (auto prototype = parse_function_prototype(begin, end, name, std::move(ret))) {
-      // try and parse a body
-      if (auto body = parse_block(begin, end)) {
-        return std::make_unique<ast_function>(std::move(prototype), std::move(body));
-      }
-      return std::make_unique<ast_function>(std::move(prototype), nullptr);
+    if (std::distance(begin, end) <= 0) {
+      _log.error("Trying to parse a function without remaining tokens");
+      return nullptr;
     }
-    return nullptr;
-    // if (is_valid_token(begin, token_type::kOPENING_DELIMITER, "(")) {
-    //   auto it = begin; // hold for creating prototype
-    //   while (!is_valid_token(begin, token_type::kCLOSING_DELIMITER, ")")) { ++begin; }
-    //
-    //   auto prototype = parse_function_prototype(it, begin);
-    //
-    //   if (is_valid_token(begin, token_type::kTERMINATOR, ";")) {// prototype
-    //     ++begin; // eat ;
-    //     return std::make_unique<ast_function>(prototype, nullptr);
-    //   } else if (is_valid_token(begin, token_type::kOPENING_DELIMITER, "{")) {// has body
-    //
-    //     it = begin; // hold for creating body
-    //
-    //     while (!is_valid_token(begin, token_type::kCLOSING_DELIMITER, "}")) { ++begin; }
-    //
-    //     auto body = parse_block(begin, end);
-    //     return std::make_unique<ast_function>(prototype, body);
-    //   } else {
-    //     return nullptr; // bad function
-    //   }
-    // }
-    // return nullptr;
-  }
-
-  std::unique_ptr<ast_variable> parse_variable(token_list_iterator& begin, const token_list_iterator& end) const {
-    if (std::distance(begin, end) <= 0) return nullptr;
     auto it = begin;
     auto type = parse_type(begin, end);
     if (!type) return nullptr;
     if (begin->type() != token_type::kPOSSIBLE_ENTITY) return nullptr;
+    _log.debug("type: ", type->name());
     auto name_token = *begin;
+    auto name = name_token.value();
+    // TODO: name check here
+    ++begin; // eat name?
+    _log.debug("name: ", name);
+    if (auto prototype = parse_function_prototype(begin, end, name, std::move(type))) {
+      // try and parse a body
+      _log.debug("value is ", begin->value(), "of type ", gTOKEN_NAMES.at(begin->type()));
+      if (auto body = parse_block(begin, end)) {
+        return std::make_unique<ast_function>(std::move(prototype), std::move(body));
+      }
+      _log.error("Function must have a body");
+      return nullptr;
+    }
+    _log.debug("No prototype for function");
+    return nullptr;
+  }
+
+  std::unique_ptr<ast_variable> parse_variable(token_list_iterator& begin, const token_list_iterator& end) const {
+    if (std::distance(begin, end) <= 0) {
+      _log.error("Trying to parse a variable/function without remaining tokens");
+      return nullptr;
+    }
+    auto it = begin;
+    auto type = parse_type(begin, end);
+    if (!type) {
+      _log.debug("Could not get type for variable");
+      return nullptr;
+    }
+    if (begin->type() != token_type::kPOSSIBLE_ENTITY) {
+      _log.debug("Name is not a possible entity found : ", gTOKEN_NAMES.at(begin->type()), " for ", begin->value());
+      return nullptr;
+    }
+    auto name_token = *begin;
+    auto name = name_token.value();
     // TODO: name check here
     ++begin; // eat name?
     // if there is no ( then it must be a variable
     if (is_valid_token(begin, token_type::kTERMINATOR, ";")) {
       ++begin; // eat ';'
-      return std::make_unique<ast_variable>(name_token.value(), std::move(type));
+      _log.debug("begin: ", begin->value());
+      return std::make_unique<ast_variable>(name, std::move(type));
     }
     if (is_valid_value(begin, "=")) {
       ++begin; // eat '='
       auto val = parse_primary(begin, end); // ; take care of by parse_expression
       if (!is_valid_token(begin, token_type::kTERMINATOR, ";")) {
-        //log warning?
+        _log.error("Assignment statement must end with ';'");
         return nullptr;
       }
       ++begin; // eat ;
-      return std::make_unique<ast_variable>(name_token.value(), std::move(type), std::move(val));
+      return std::make_unique<ast_variable>(name, std::move(type), std::move(val));
       // we need to assign value to a variable
     }
-    // if (is_valid_token(begin, token_type::kOPENING_DELIMITER, "(")) {
-    //   while (!is_valid_token(begin, token_type::kCLOSING_DELIMITER, ")")) {
-    //
-    //     ++begin;
-    //   }
-    //   if (is_valid_token(begin, token_type::kTERMINATOR, ";")) {// prototype
-    //
-    //   }
-    //   else if (is_valid_token(begin, token_type::kOPENING_DELIMITER, "{")) {// has body
-    //
-    //   }
-    //   else return nullptr; // bad function
-    //   return std::make_unique<ast_function>()
-    // }//return std::make_unique<ast_variable>(name_token.value(), type_token.value(), mods);
-    // else this is a function
-    //if (is_valid_token(begin, token_type::kOPENING_DELIMITER, "(")) return parse_function(begin, end, name_token, type_token, mods);
-    // log error? warning?
+    if (is_valid_token(begin, token_type::kOPENING_DELIMITER, "(")) {
+      auto it = begin;
+      while (!is_valid_token(it, token_type::kCLOSING_DELIMITER, ")")) ++it;
+      if (is_valid_token(it, token_type::kOPENING_DELIMITER, "{")) {
+        // must be a function
+        return nullptr;
+      }
+      if (is_valid_token(begin, token_type::kTERMINATOR, ";")) {
+        // constructor stuff
+      }
+    }
     return nullptr;
   }
 
@@ -354,14 +359,20 @@ protected:
   std::unique_ptr<ast_match> parse_match(token_list_iterator& begin, const token_list_iterator& end) const { return nullptr; }
 
   std::unique_ptr<ast_if> parse_if(token_list_iterator& begin, const token_list_iterator& end) const {
-    if (std::distance(begin, end) <= 0) return nullptr;
-    if (!is_valid_token(begin, token_type::kIF, "if")) return nullptr;
+    if (std::distance(begin, end) <= 0) {
+      _log.error("Trying to parse an if without remaining tokens");
+      return nullptr;
+    }
+    if (!is_valid_token(begin, token_type::kIF, "if")) {
+      _log.error("if statement must start with 'if'");
+      return nullptr;
+    }
 
     ++begin; // eat 'if'
     auto condition = parse_parentheses(begin, end); // should capture condition
 
     if (!condition) {
-      // log error
+      _log.error("Cannot have an empty condition in if");
       return nullptr;
     }
     auto then = parse_expression(begin, end);
@@ -374,12 +385,33 @@ protected:
     return std::make_unique<ast_if>(std::move(condition), std::move(then), nullptr);
   }
 
+  std::unique_ptr<ast_return> parse_return(token_list_iterator& begin, const token_list_iterator& end) const {
+    if (std::distance(begin, end) <= 0) return nullptr;
+    ++begin; //eat return
+    auto res = std::make_unique<ast_return>(parse_expression(begin, end));
+
+    if (!res) return nullptr; // should have an error
+    return res;
+  }
+
   std::unique_ptr<ast_expression> parse_primary(token_list_iterator& begin, const token_list_iterator& end) const {
     if (std::distance(begin, end) <= 0) return nullptr;
     auto tok = *begin;
-    std::unique_ptr<ast_expression> res = std::move(parse_variable(begin, end));
-    if (res) return res;
+    auto it = begin;
+    auto var = std::move(parse_variable(it, end));
+    if (var) {
+      begin = it;
+      return var;
+    }
+    it = begin;
+    auto fn = std::move(parse_function(it, end));
+    if (fn) {
+      begin = it;
+      return fn;
+    }
     switch (tok.type()) {
+      case token_type::kRETURN:
+        return parse_return(begin, end);
       case token_type::kSTRING_LITERAL:
         return parse_string(begin, end);
       case token_type::kCHAR_LITERAL:
@@ -425,50 +457,80 @@ protected:
   std::unique_ptr<ast_program> parse_program(token_list_iterator& begin, const token_list_iterator& end) const {
     if (std::distance(begin, end) <= 0) return nullptr;
     auto program = std::unique_ptr<ast_program>(new ast_program());
-    while (begin++ != end) {
-      switch (begin->type()) {
-        case token_type::kMODULE:
-        case token_type::kIMPORT:
-        case token_type::kINTERFACE:
-        case token_type::kCLASS:
-        case token_type::kFUNCTION:
-        case token_type::kUNION:
-        case token_type::kENUM:
-        case token_type::kVARIABLE:
-
-        case token_type::kEND_OF_FILE:
-          return program;
-        default:
-          return nullptr;
+    auto max_fails = 3u;
+    auto fails = 0u;
+    while (begin != end) {
+      auto it = begin;
+      _log.debug("adding expression to program (b != e) is ", (begin != end), " and value is ", begin->value());
+      program->add_expression(std::move(parse_expression(begin, end)));
+      if (it == begin) {
+        _log.debug("Failure");
+        ++fails;
+      }
+      if (fails == max_fails) {
+        _log.error("Max failures during compilation, cannot continue");
+        return nullptr;
       }
     }
-    return nullptr;
+    _log.debug("Created program");
+    return program;
   }
 
   std::unique_ptr<ast_block> parse_block(token_list_iterator& begin, const token_list_iterator& end) const {
-    if (std::distance(begin, end) <= 0) return nullptr; // TODO: add logging mechanism that dumps errors at end of compilation
-    if (is_valid_token(begin, token_type::kTERMINATOR, ";")) return nullptr; // cannot create block
-    if (!is_valid_token(begin, token_type::kOPENING_DELIMITER, "{")) return nullptr;
+    if (std::distance(begin, end) <= 0) {
+      _log.error("Trying to parse a block without remaining tokens");
+      return nullptr;
+    }
+    if (is_valid_token(begin, token_type::kTERMINATOR, ";")) {
+      _log.error("Found terminating token, therefore cannot parse block");
+      return nullptr;
+    }
+    if (!is_valid_token(begin, token_type::kOPENING_DELIMITER, "{")) {
+      _log.error("Cannot parse block without '{'");
+      return nullptr;
+    }
     ++begin; // eat '{'
     std::unique_ptr<ast_block> block(new ast_block());
     while (begin != end) { // block must look like { code }
+    _log.debug("adding expression to program (b != e) is ", (begin != end), " and value is ", begin->value());
       if (is_valid_token(begin, token_type::kCLOSING_DELIMITER, "}")) {
         ++begin; // eat '}'
         return block;
       }
       auto expr = parse_expression(begin, end);
+      _log.debug("adding expression to program (b != e) is ", (begin != end), " and value is ", begin->value());
       if (expr) {
+        expr->print(std::cout);
+        _log.debug("begin: ", begin->value(), " | ", gTOKEN_NAMES.at(begin->type()));
         block->add_expression(std::move(expr));
       } else {
         ++begin;
         // log warning?
       }
     }
+    _log.debug("bad block");
     return nullptr;
   }
 public:
-  parser() {
-    //_scopes.push(gSCOPE);
+  parser() : _log(output::logger(output::output_type::kSTANDARD_OUTPUT)) {
+    scope global_scope = scope("");
+
+    global_scope.add_public_symbol("auto", "");
+    global_scope.add_public_symbol("bool", "");
+    global_scope.add_public_symbol("char", "");
+    global_scope.add_public_symbol("flt32", "");
+    global_scope.add_public_symbol("flt64", "");
+    global_scope.add_public_symbol("int8", "");
+    global_scope.add_public_symbol("int16", "");
+    global_scope.add_public_symbol("int32", "");
+    global_scope.add_public_symbol("int64", "");
+    global_scope.add_public_symbol("uint8", "");
+    global_scope.add_public_symbol("uint16", "");
+    global_scope.add_public_symbol("uint32", "");
+    global_scope.add_public_symbol("uint64", "");
+    global_scope.add_public_symbol("void", "");
+
+    _scopes.push(global_scope);
   }
 
   std::unique_ptr<ast_program> parse(const std::list<token>& tokens) const {
@@ -477,7 +539,9 @@ public:
     //auto begin = tokens.begin();
     //auto end = tokens.end();
     // make expression
-    return nullptr;//parse_program(begin, end);
+    auto begin = tokens.cbegin();
+    auto end = tokens.cend();
+    return parse_program(begin, end);
     // need to keep track of imports manually...
     // so need to use the scope objects to hold objects/functions
     // then need to see if have to build imported file

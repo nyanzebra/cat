@@ -1,7 +1,5 @@
 #pragma once
 
-#include "styler.hpp"
-
 #include "deps/std.hpp"
 
 namespace output {
@@ -11,7 +9,6 @@ private:
   size_t _tabs;
   std::string _header;
   std::string _footer;
-  styler _styler;
 protected:
 public:
 private:
@@ -21,19 +18,18 @@ public:
   template<typename T = std::string, typename U = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value && std::is_constructible<std::string, U>::value>>
   formatter(T&& header, U&& footer, size_t tabs) : _header(std::move(header)), _footer(std::move(footer)), _tabs(tabs) {}
 
-  std::string format() const {
+  template<typename T = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
+  const std::string format(T&& str) const {
     std::stringstream stream;
 
     stream << _header;
 
-
+    stream << str;
 
     stream << _footer;
 
     return stream.str();
   }
-
-  const styler& styler() const { return _styler; }
 
   const std::string& header() const { return _header; }
   template<typename T = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
