@@ -15,7 +15,7 @@ public:
     stream << '{' << std::endl;
     for (auto it = _expressions.begin(); it != _expressions.end(); ++it) {
       (*it)->print(stream, tabs + 1);
-      stream << "\n";
+      //stream << "\n"; not needed?
     }
     stream << '}';
     return stream;
@@ -23,6 +23,7 @@ public:
 
   void add_expression(std::unique_ptr<ast_expression> expr) { _expressions.push_back(std::move(expr)); }
 
+  const std::list<std::unique_ptr<ast_expression>>& expressions() const { return _expressions; }
 
   void* accept(code_generator_visitor* visitor, const scope& current_scope) override;
 };

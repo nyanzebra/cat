@@ -57,7 +57,7 @@ protected:
     if (is_valid_type(begin, token_type::kCHAR_LITERAL)) {
       auto res = std::make_unique<ast_char>(begin->value()[1]); // '\'','a', '\''
       ++begin; // eat
-      return std::move(res);
+      return res;
     }
     return nullptr;
   }
@@ -103,7 +103,7 @@ protected:
     if (is_valid_type(begin, token_type::kSTRING_LITERAL)) {
       auto res = std::make_unique<ast_string>(begin->value());
       ++begin; // eat
-      return std::move(res);
+      return res;
     }
     return nullptr;
   }
@@ -254,6 +254,7 @@ protected:
       return nullptr;
     }
     if (begin->type() != token_type::kPOSSIBLE_ENTITY) {
+      std::cout << "2. type: " << *begin << std::endl;
       _log.debug("Name is not a possible entity found : ", gTOKEN_NAMES.at(begin->type()), " for ", begin->value());
       return nullptr;
     }
@@ -322,7 +323,7 @@ protected:
   std::unique_ptr<ast_expression> parse_binary_operation_expression(token_list_iterator& begin, const token_list_iterator& end, std::unique_ptr<ast_expression> lhs) const {
     if (std::distance(begin, end) <= 0) return lhs;
     if (!lhs) return nullptr;
-    return std::move(lhs);
+    return lhs;
   }
 
   std::unique_ptr<ast_for> parse_for(token_list_iterator& begin, const token_list_iterator& end) const {
@@ -501,6 +502,7 @@ protected:
       _log.debug("adding expression to program (b != e) is ", (begin != end), " and value is ", begin->value());
       if (expr) {
         expr->print(std::cout);
+        std::cout << "1. type: " << static_cast<size_t>(begin->type()) << std::endl;
         _log.debug("begin: ", begin->value(), " | ", gTOKEN_NAMES.at(begin->type()));
         block->add_expression(std::move(expr));
       } else {

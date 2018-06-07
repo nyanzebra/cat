@@ -13,8 +13,6 @@ protected:
   }
 public:
   virtual ~ast_expression() = default;
-
-  virtual std::ostream& print(std::ostream& stream, size_t tabs = 0) = 0;
 };
 
 } // namespace syntax

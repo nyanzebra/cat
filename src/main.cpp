@@ -5,6 +5,7 @@
 #include "syntax/ast_visitors.hpp"
 
 #include "deps/std.hpp"
+#include "utility/exports.hpp"
 
 #define MIN_ARGS 5
 

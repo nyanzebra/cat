@@ -91,6 +91,14 @@ private:
         break;
         case '<':
         case '>':
+        {
+          if (!_tokens.empty()) {
+            if (_tokens.back().value().size() == 1 && _tokens.back().value()[0] == '-') {
+              tok += c;
+              continue;
+            }
+          }
+        }
         case ':':
         case '+':
         case '-':
@@ -99,6 +107,20 @@ private:
         case '|':
         case '?':
         case '.':
+        {
+          if (!_tokens.empty()) {
+            bool is_number = true;
+            for (auto it = _tokens.back().value().begin(); it != _tokens.back().value().end(); ++it) {
+              if (*it < '0' && *it > '9') {
+                is_number = false;
+              }
+            }
+            if (is_number) {
+              tok += c;
+              continue;
+            }
+          }
+        }
         case '*':
         case '%':
         case '#':

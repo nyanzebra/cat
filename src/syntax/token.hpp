@@ -1,7 +1,7 @@
 #pragma once
 
 #include "keyword.hpp"
-
+#include "deps/std.hpp"
 #include <algorithm>
 
 namespace syntax {

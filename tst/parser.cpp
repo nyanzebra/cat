@@ -565,16 +565,16 @@ TEST(parse, function) {
 
 TEST(parse, parse_program) {
   test_parser p;
-  syntax::token t(0, "test", "flt32");
-  std::list<syntax::token> l;
-
-  auto start = l.cbegin();
-  auto res = p.parse_program(start, l.cend());
+  syntax::lexer l;
+  auto tokens = l.tokens();
+  auto start = tokens.cbegin();
+  auto res = p.parse_program(start, tokens.cend());
   ASSERT_EQ(nullptr, res);
 
-  l.push_back(t);
-  start = l.cbegin();
-  res = p.parse_program(start, l.cend());
+  l.lex("../basic_main.cat");
+  tokens = l.tokens();
+  start = tokens.cbegin();
+  res = p.parse_program(start, tokens.cend());
   //TODO: change when implemented more
   ASSERT_FALSE(false);
 

@@ -5,7 +5,8 @@ if [[ -e bin ]]; then
 fi
 mkdir bin
 cd bin
-cmake ../src
+cmake ..
 make clean
-make cat ARGS=-V
-./cat -i /Users/robertbaldwin/Documents/GitHub/cat/tst/basic_main.cat -o /Users/robertbaldwin/Documents/GitHub/cat/tst/basic_main.o;
+make catc ARGS=-V
+./catc -i /Users/robertbaldwin/Documents/GitHub/cat/tst/basic_main.cat -o /Users/robertbaldwin/Documents/GitHub/cat/tst/basic_main.o;
+clang++ /Users/robertbaldwin/Documents/GitHub/cat/tst/__main.cpp /Users/robertbaldwin/Documents/GitHub/cat/tst/basic_main.o -o /Users/robertbaldwin/Documents/GitHub/cat/tst/basic_main

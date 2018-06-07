@@ -4,17 +4,7 @@
 #include "syntax/scope.hpp"
 //#include "output/logger.hpp"
 
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/Analysis/BasicAliasAnalysis.h"
-#include "llvm/Analysis/Passes.h"
-#include "llvm/IR/DIBuilder.h"
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/LegacyPassManager.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/Verifier.h"
-#include "llvm/Support/TargetSelect.h"
-#include "llvm/Transforms/Scalar.h"
+#include "deps/llvm.hpp"
 
 namespace syntax {
 
@@ -23,7 +13,7 @@ private:
   std::unique_ptr<llvm::Module> _module;
   std::unique_ptr<llvm::DIBuilder> _dibuilder;
   //output::logger _log(output::output_type::kSTANDARD_ERROR);
-
+  size_t _main_count;
   llvm::DICompileUnit* _compile_unit;
 protected:
 public:
@@ -52,7 +42,7 @@ public:
   void* visit(ast_arm* ast, const scope& current_scope);
   void* visit(ast_assembly* ast, const scope& current_scope);
   void* visit(ast_binary_operator* ast, const scope& current_scope);
-  llvm::Value* visit(ast_block* ast, const scope& current_scope);
+  void* visit(ast_block* ast, const scope& current_scope);
   void* visit(ast_for* ast, const scope& current_scope);
   llvm::Value* visit(ast_function_call* ast, const scope& current_scope);
   llvm::Function* visit(ast_function_prototype* ast, const scope& current_scope);
@@ -69,9 +59,9 @@ public:
   void* visit(ast_try* ast, const scope& current_scope);
   llvm::Type* visit(ast_type* ast, const scope& current_scope);
   void* visit(ast_unary_operator* ast, const scope& current_scope);
-  void* visit(ast_variable* ast, const scope& current_scope);
+  llvm::Value* visit(ast_variable* ast, const scope& current_scope);
   void* visit(ast_while* ast, const scope& current_scope);
-  void* visit(ast_return* ast, const scope& current_scope);
+  llvm::ReturnInst* visit(ast_return* ast, const scope& current_scope);
 }; // class visitor
 
 } // namespace syntax

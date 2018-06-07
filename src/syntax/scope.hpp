@@ -1,12 +1,26 @@
 #pragma once
 
 #include "deps/std.hpp"
+#include "deps/llvm.hpp"
 
 namespace syntax {
+
+class scoped_variable {
+private:
+  std::string _name;
+  std::string _scope;
+  std::optional<llvm::Value> _value;
+protected:
+public:
+private:
+protected:
+public:
+}
 
 class scope {
 private:
   std::string _module;
+  std::unordered_multimap<,>
   std::unordered_map<std::string, std::string> _public_symbols;
   std::unordered_map<std::string, std::string> _protected_symbols;
   std::unordered_map<std::string, std::string> _private_symbols;

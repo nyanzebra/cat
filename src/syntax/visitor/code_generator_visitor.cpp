@@ -1,71 +1,15 @@
 #include "syntax/visitor/code_generator_visitor.hpp"
-//#include "output/logger.hpp"
 
-// #endif
-// #endif
-// #if LLVM_VERSION_GE(4, 0)
-// #if LLVM_VERSION_LE(4, 0)
-// #include "llvm-c/Transforms/PassManagerBuilder.h"
-// #include "llvm/Analysis/TargetLibraryInfo.h"
-// #include "llvm/Analysis/TargetTransformInfo.h"
-// #include "llvm/ExecutionEngine/ExecutionEngine.h"
-// #include "llvm/ExecutionEngine/Interpreter.h"
-// #include "llvm/ExecutionEngine/MCJIT.h"
-// #include "llvm/IR/AssemblyAnnotationWriter.h"
-// #include "llvm/IR/AutoUpgrade.h"
-// #include "llvm/IR/DebugInfo.h"
-// #include "llvm/IR/DIBuilder.h"
-// #include "llvm/IR/IRPrintingPasses.h"
-// #include "llvm/Linker/Linker.h"
-// #include "llvm/LTO/LTO.h"
-// #include "llvm/Object/ModuleSummaryIndexObjectFile.h"
-// #include "llvm/Support/CBindingWrapping.h"
-// #include "llvm/Support/Host.h"
-// #include "llvm/Transforms/IPO/AlwaysInliner.h"
-// #include "llvm/Transforms/IPO/FunctionImport.h"
-// #include "llvm/Transforms/IPO/PassManagerBuilder.h"
-// #include "llvm/Transforms/Utils/FunctionImportUtils.h"
-#include "llvm-c/BitReader.h"
-#include "llvm-c/Core.h"
-#include "llvm-c/ExecutionEngine.h"
-#include "llvm-c/Object.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/DenseSet.h"
-#include "llvm/ADT/Triple.h"
-#include "llvm/Analysis/Lint.h"
-#include "llvm/Analysis/Passes.h"
-//#include "llvm/Bitcode/ReaderWriter.h"
-#include "llvm/IR/InlineAsm.h"
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/PassManager.h"
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/DynamicLibrary.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/FormattedStream.h"
-#include "llvm/Support/Host.h"
-#include "llvm/Support/Memory.h"
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/TargetRegistry.h"
-#include "llvm/Support/TargetSelect.h"
-#include "llvm/Support/Timer.h"
-#include "llvm/Target/TargetMachine.h"
-#include "llvm/Target/TargetOptions.h"
-#include "llvm/Target/TargetSubtargetInfo.h"
-#include "llvm/Transforms/Instrumentation.h"
-#include "llvm/Transforms/IPO.h"
-#include "llvm/Transforms/Scalar.h"
-#include "llvm/Transforms/Vectorize.h"
+#include "deps/llvm.hpp"
 
 namespace syntax {
 
 static llvm::LLVMContext gCONTEXT;
 static llvm::IRBuilder<> gBUILDER(gCONTEXT);
+static llvm::TargetMachine* gTARGET_MACHINE = nullptr;
 
-llvm::TargetMachine* target_machine() {
+static llvm::TargetMachine* target_machine() {
+  if (gTARGET_MACHINE) return gTARGET_MACHINE;
   std::string error;
   auto triple = llvm::sys::getProcessTriple();
   std::cout << "triple " << triple << std::endl;
@@ -97,7 +41,8 @@ llvm::TargetMachine* target_machine() {
   //   options.TrapUnreachable = true;
   // }
 
-  return target->createTargetMachine(trip.getTriple(), "generic", "", options, llvm::Optional<llvm::Reloc::Model>());
+  gTARGET_MACHINE = target->createTargetMachine(trip.getTriple(), "generic", "", options, llvm::Optional<llvm::Reloc::Model>());
+  return gTARGET_MACHINE;
 }
 
 void code_generator_visitor::initialize() {
@@ -105,11 +50,15 @@ void code_generator_visitor::initialize() {
   llvm::InitializeNativeTargetAsmParser();
   llvm::InitializeNativeTargetAsmPrinter();
 
+  _main_count = 0u;
   // Any other initialize features
 
   //llvm::InitializeModule();
-  _module = std::make_unique<llvm::Module>("cat", gCONTEXT);
-  //_module->setDataLayout()
+  _module = std::make_unique<llvm::Module>("catc", gCONTEXT);
+
+  auto machine = target_machine();
+  _module->setDataLayout(machine->createDataLayout());
+  _module->setTargetTriple(llvm::sys::getProcessTriple());
   _module->addModuleFlag(llvm::Module::Warning, "Debug Info Version", llvm::DEBUG_METADATA_VERSION);
 
   if (llvm::Triple(llvm::sys::getProcessTriple()).isOSDarwin()) {
@@ -119,7 +68,7 @@ void code_generator_visitor::initialize() {
   _dibuilder = std::make_unique<llvm::DIBuilder>(*_module);
 }
 void code_generator_visitor::create_compile_units(const std::list<std::string>& units) {
-  bool is_optimized = false;
+  bool is_optimized = true;
   std::string flags = "";
   auto runtime_version = 0u;
   for (const auto& unit : units) {
@@ -130,109 +79,167 @@ void code_generator_visitor::create_compile_units(const std::list<std::string>& 
   }
 }
 void code_generator_visitor::finalize(const std::string& output) {
+
+  std::cout << "print module" << std::endl;
+  _module->print(llvm::errs(), nullptr);
+  std::cout << "dump module" << std::endl;
+  _module->dump();
+
   llvm::legacy::PassManager pass_manager;
   std::error_code err;
   llvm::raw_fd_ostream out(output, err, llvm::sys::fs::F_None);
+  if (err) {
+    llvm::errs() << "Could not open file: " << err.message();
+  }
   std::cout << "add pass to target machine" << std::endl;
   auto machine = target_machine();
 
-  machine->addPassesToEmitFile(pass_manager, out, llvm::TargetMachine::CodeGenFileType::CGFT_ObjectFile);
+  if (machine->addPassesToEmitFile(pass_manager, out, llvm::TargetMachine::CodeGenFileType::CGFT_ObjectFile)) {
+    llvm::errs() << "target machine cannot emit file of this type";
+  }
   //pass_manager.add(llvm::createPrintModulePass(out, ));
+  _dibuilder->finalize();
+
   std::cout << "running pass manager" << std::endl;
   pass_manager.run(*_module);
   out.flush();
-  std::cout << "dump module" << std::endl;
-  _dibuilder->finalize();
-  _module->print(llvm::errs(), nullptr);
-  _module->dump();
 }
 
 llvm::Value* code_generator_visitor::visit(ast_bool* ast, const scope& current_scope) {
+  if (!ast) return nullptr;
+  _module->dump();
   std::cout << "ast_bool" <<std::endl;
 
   return llvm::ConstantInt::getSigned(llvm::Type::getInt1Ty(gCONTEXT), ast->value());
 }
 llvm::Value* code_generator_visitor::visit(ast_int8* ast, const scope& current_scope) {
+  if (!ast) return nullptr;
+  _module->dump();
   std::cout << "ast_int8" <<std::endl;
 
   return llvm::ConstantInt::getSigned(llvm::Type::getInt8Ty(gCONTEXT), ast->value());
 }
 llvm::Value* code_generator_visitor::visit(ast_uint8* ast, const scope& current_scope) {
+  if (!ast) return nullptr;
+  _module->dump();
   std::cout << "ast_uint8" <<std::endl;
 
   return llvm::ConstantInt::get(llvm::Type::getInt8Ty(gCONTEXT), ast->value());
 }
 llvm::Value* code_generator_visitor::visit(ast_int16* ast, const scope& current_scope) {
+  if (!ast) return nullptr;
+  _module->dump();
   std::cout << "ast_int16" <<std::endl;
 
   return llvm::ConstantInt::getSigned(llvm::Type::getInt16Ty(gCONTEXT), ast->value());
 }
 llvm::Value* code_generator_visitor::visit(ast_uint16* ast, const scope& current_scope) {
+  if (!ast) return nullptr;
+  _module->dump();
   std::cout << "ast_uint16" <<std::endl;
 
   return llvm::ConstantInt::get(llvm::Type::getInt16Ty(gCONTEXT), ast->value());
 }
 llvm::Value* code_generator_visitor::visit(ast_int32* ast, const scope& current_scope) {
+  if (!ast) return nullptr;
+  _module->dump();
   std::cout << "ast_int32" <<std::endl;
 
   return llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(gCONTEXT), ast->value());
 }
 llvm::Value* code_generator_visitor::visit(ast_uin32* ast, const scope& current_scope) {
+  if (!ast) return nullptr;
+  _module->dump();
   std::cout << "ast_uint32" <<std::endl;
 
   return llvm::ConstantInt::get(llvm::Type::getInt32Ty(gCONTEXT), ast->value());
 }
 llvm::Value* code_generator_visitor::visit(ast_int64* ast, const scope& current_scope) {
+  if (!ast) return nullptr;
+  _module->dump();
   std::cout << "ast_int64" <<std::endl;
 
   return llvm::ConstantInt::getSigned(llvm::Type::getInt64Ty(gCONTEXT), ast->value());
 }
 llvm::Value* code_generator_visitor::visit(ast_uint64* ast, const scope& current_scope) {
+  if (!ast) return nullptr;
+  _module->dump();
   std::cout << "ast_uint64" <<std::endl;
 
   return llvm::ConstantInt::get(llvm::Type::getInt64Ty(gCONTEXT), ast->value());
 }
 llvm::Value* code_generator_visitor::visit(ast_flt32* ast, const scope& current_scope) {
+  if (!ast) return nullptr;
+  _module->dump();
   std::cout << "ast_flt32" <<std::endl;
 
-  return llvm::ConstantInt::get(llvm::Type::getFloatTy(gCONTEXT), ast->value());
+  return llvm::ConstantFP::get(llvm::Type::getFloatTy(gCONTEXT), ast->value());
 }
 llvm::Value* code_generator_visitor::visit(ast_flt64* ast, const scope& current_scope) {
-  std::cout << "ast_flt64" <<std::endl;
+  if (!ast) return nullptr;
+  _module->dump();
+  std::cout << "ast_flt64 " << ast->value() <<std::endl;
 
-  return llvm::ConstantInt::get(llvm::Type::getDoubleTy(gCONTEXT), ast->value());
+  return llvm::ConstantFP::get(llvm::Type::getDoubleTy(gCONTEXT), ast->value());
 }
 void* code_generator_visitor::visit(ast_arm* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_arm" <<std::endl;
 
   return nullptr;
 }
 void* code_generator_visitor::visit(ast_assembly* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_assembly" <<std::endl;
 
   return nullptr;
 }
 void* code_generator_visitor::visit(ast_binary_operator* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_binary_operator" <<std::endl;
 
   return nullptr;
 }
-llvm::Value* code_generator_visitor::visit(ast_block* ast, const scope& current_scope) {
+void* code_generator_visitor::visit(ast_block* ast, const scope& current_scope) {
+  if (!ast) {
+    std::cout << "block is empty" << std::endl;
+  }
+  _module->dump();
   std::cout << "ast_block" <<std::endl;
 
-  return nullptr;
+  for (auto&& expr : ast->expressions()) {
+    if (expr) {
+      if (!expr->accept(this, current_scope)) {
+        return nullptr;
+      }
+    }
+  }
+  // TODO: clean this up, want something better than returning self
+  return ast;
 }
 void* code_generator_visitor::visit(ast_for* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_for" <<std::endl;
 
   return nullptr;
 }
-void* code_generator_visitor::visit(ast_return* ast, const scope& current_scope) {
+llvm::ReturnInst* code_generator_visitor::visit(ast_return* ast, const scope& current_scope) {
+  if (!ast) {}
+  if (!(ast->expression())) {
+    return gBUILDER.CreateRetVoid();
+  }
+  _module->dump();
   std::cout << "ast_return" <<std::endl;
 
-  return nullptr;
+  return gBUILDER.CreateRet((llvm::Value*)ast->expression()->accept(this, current_scope));
 }
 llvm::Value* code_generator_visitor::visit(ast_function_call* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_function_call" <<std::endl;
 
   llvm::Function* call = _module->getFunction(ast->callee());
@@ -258,7 +265,18 @@ llvm::Value* code_generator_visitor::visit(ast_function_call* ast, const scope& 
   return gBUILDER.CreateCall(call, args, "calltmp");
 }
 llvm::Function* code_generator_visitor::visit(ast_function_prototype* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_function_prototype" <<std::endl;
+
+  if (ast->name() == "main") {
+    if (_main_count > 0) {
+      std::cout << "Cannot have more than one main function!" << std::endl;
+      return nullptr;
+    }
+    ast->name("cat_main");
+    ++_main_count;
+  }
 
   std::vector<llvm::Type*> args(ast->args().size());
   for (const auto& arg : ast->args()) {
@@ -293,6 +311,8 @@ llvm::Function* code_generator_visitor::visit(ast_function_prototype* ast, const
   return function;
 }
 llvm::Function* code_generator_visitor::visit(ast_function* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_function" <<std::endl;
 
   if (!ast->prototype()) {
@@ -314,7 +334,7 @@ llvm::Function* code_generator_visitor::visit(ast_function* ast, const scope& cu
 
   scope next_scope(current_scope);
   for (auto& arg : function->args()) {
-    // evaluate each expr and get resut for calling function
+    // evaluate each expr and get result for calling function
   }
 
   auto body = ast->body().get();
@@ -323,8 +343,7 @@ llvm::Function* code_generator_visitor::visit(ast_function* ast, const scope& cu
     std::cout << "body is nullptr" << std::endl;
   }
 
-  if (llvm::Value* result = static_cast<llvm::Value*>(body->accept(this, next_scope))) {
-    gBUILDER.CreateRet(result);
+  if (body->accept(this, next_scope)) {
     std::cout << "verifyFunction" << std::endl;
     llvm::verifyFunction(*function);
 
@@ -335,31 +354,43 @@ llvm::Function* code_generator_visitor::visit(ast_function* ast, const scope& cu
   return nullptr;
 }
 void* code_generator_visitor::visit(ast_if* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_if" <<std::endl;
 
   return nullptr;
 }
 void* code_generator_visitor::visit(ast_match* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_match" <<std::endl;
 
   return nullptr;
 }
 void* code_generator_visitor::visit(ast_meta_class* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_meta_class" <<std::endl;
 
   return nullptr;
 }
 void* code_generator_visitor::visit(ast_meta_interface* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_meta_interface" <<std::endl;
 
   return nullptr;
 }
 void* code_generator_visitor::visit(ast_pattern* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_pattern" <<std::endl;
 
   return nullptr;
 }
 void* code_generator_visitor::visit(ast_program* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_program" <<std::endl;
 
   for (const auto& expr : ast->expressions()) {
@@ -368,41 +399,67 @@ void* code_generator_visitor::visit(ast_program* ast, const scope& current_scope
   return nullptr;
 }
 void* code_generator_visitor::visit(ast_range* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_range" <<std::endl;
 
   return nullptr;
 }
 void* code_generator_visitor::visit(ast_string* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_string" <<std::endl;
 
   return nullptr;
 }
 void* code_generator_visitor::visit(ast_template* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_template" <<std::endl;
 
   return nullptr;
 }
 void* code_generator_visitor::visit(ast_try* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_try" <<std::endl;
 
   return nullptr;
 }
 llvm::Type* code_generator_visitor::visit(ast_type* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_type" <<std::endl;
 
   return nullptr;
 }
 void* code_generator_visitor::visit(ast_unary_operator* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_unary_operator" <<std::endl;
 
   return nullptr;
 }
-void* code_generator_visitor::visit(ast_variable* ast, const scope& current_scope) {
+llvm::Value* code_generator_visitor::visit(ast_variable* ast, const scope& current_scope) {
+  if (!ast) return nullptr;
+  _module->dump();
   std::cout << "ast_variable" <<std::endl;
 
-  return nullptr;
+  llvm::Value* value = (llvm::Value*)ast->value()->accept(this, current_scope);
+  std::cout << ((value != nullptr) ? "got value" : "did not get value") << std::endl;
+  auto name = ast->name().c_str();
+  std::cout << "variable name: " << ast->name() << std::endl;
+
+  // need to keep this in the scope object!
+  llvm::Function* fn = gBUILDER.GetInsertBlock()->getParent();
+
+  auto alloc = llvm::IRBuilder<>(&fn->getEntryBlock(), fn->getEntryBlock().begin()).CreateAlloca( ,nullptr, name);
+  gBUILDER.CreateStore(value, alloc);
+  return gBUILDER.CreateLoad(alloc, name);
 }
 void* code_generator_visitor::visit(ast_while* ast, const scope& current_scope) {
+
+  _module->dump();
   std::cout << "ast_while" <<std::endl;
 
   return nullptr;

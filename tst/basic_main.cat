@@ -6,8 +6,12 @@ should ignore block too
 
 */
 
+//extern put;
+
 int64 main(/*vector<string> args*/) {
-  flt32 f;
+  flt32 f = 3.14;
+
+  //put('a', standard_output);
 
   //all done
   return 0;
