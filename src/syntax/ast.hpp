@@ -1,8 +1,6 @@
 #pragma once
 
-#include "ast_visitors.hpp"
 #include "operators.hpp"
-
 
 #include "ast/ast_arithmetic.hpp"
 #include "ast/ast_arm.hpp"
@@ -23,6 +21,7 @@
 #include "ast/ast_pattern.hpp"
 #include "ast/ast_program.hpp"
 #include "ast/ast_range.hpp"
+#include "ast/ast_return.hpp"
 #include "ast/ast_string.hpp"
 #include "ast/ast_template.hpp"
 #include "ast/ast_try.hpp"
@@ -34,9 +33,3 @@
 #include "ast/modifiers.hpp"
 
 #include "utility/enum.hpp"
-
-namespace syntax {
-
-
-
-} // namespace syntax

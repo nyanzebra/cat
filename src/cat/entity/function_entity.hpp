@@ -24,7 +24,10 @@ public:
 
   const function_signature& function_signature() const { return _signature; }
   const entity_ptrs& args_types() const { return _args_types; }
-  size_t size() const { assert(_type == type::kFUNCTION && "Size of function can only work on functions"); return sizeof(void*); }
+  size_t size() const {
+    // assert(_type == type::kFUNCTION && "Size of function can only work on functions"); 
+    return sizeof(void*);
+  }
 };
 
 typedef std::unique_ptr<function_entity> function_entity_ptr;

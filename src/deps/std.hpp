@@ -1,6 +1,7 @@
 // standard
 #include <exception>
 #include <fstream>
+#include <sstream>
 #include <functional>
 #include <iostream>
 #include <list>
@@ -13,5 +14,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <cstdio>
 
 #include <experimental/optional>

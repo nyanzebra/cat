@@ -1,6 +1,6 @@
 #pragma once
 
-#include "std.hpp"
+#include "deps/std.hpp"
 
 #include "token_type.hpp"
 

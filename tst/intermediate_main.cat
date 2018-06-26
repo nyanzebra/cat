@@ -1,0 +1,20 @@
+//import std { io, string, vector }
+
+// comment to ignore
+
+/*
+
+should ignore block too
+
+*/
+
+int64 main(/*vector<string> args*/) {
+  flt32 f;
+  volatile flt32 g;
+  mutable volatile flt32 h;
+  static mutable volatile flt32 i;
+  extern static mutable volatile flt32 j;
+
+  //std::io::out << "Args: " << args << std::io::endl;
+  //std::io::out << "Eval (2 * (3 + 4)** 5)" << (2 * (3 + 4) ** 5) << std::io::endl;
+}

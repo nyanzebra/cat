@@ -35,7 +35,7 @@ public:
   operator std::string() { return _value; }
   operator std::string() const { return _value; }
 
-  virtual std::ostream& print(std::ostream& stream, size_t tabs = 0) {
+  std::ostream& print(std::ostream& stream, size_t tabs = 0) override {
     stream << _value;
     return stream;
   }
@@ -45,8 +45,7 @@ public:
   template<typename U = std::string, typename = std::enable_if_t<std::is_constructible<std::string, U>::value>>
   void value(U&& value) { _value = std::move(value); }
 
-  template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>
-  typename Visitor::return_type accept(std::unique_ptr<Visitor> visitor) { return visitor->visit(std::make_unique<decltype(this)>(this)); }
+  void* accept(code_generator_visitor* visitor) override;
 };
 
 } // namespace syntax

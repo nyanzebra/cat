@@ -6,8 +6,8 @@
 #include "deps/std.hpp"
 
 namespace syntax {
-
-template <typename T, typename = std::enable_if_t<std::is_arithmetic<T>::value>>
+//, typename = std::enable_if_t<std::is_arithmetic<T>::value>
+template <typename T>
 class ast_arithmetic final : public ast_expression {
 private:
   T _value;
@@ -37,7 +37,7 @@ public:
   operator T() { return _value; }
   operator T() const { return _value; }
 
-  virtual std::ostream& print(std::ostream& stream, size_t tabs = 0) {
+  std::ostream& print(std::ostream& stream, size_t tabs = 0) override {
     indent(stream, tabs);
     std::is_same<T, bool>::value ? (stream << std::boolalpha << _value << std::dec) : (stream << _value);
     return stream;
@@ -48,8 +48,7 @@ public:
   template<typename U = T, typename = std::enable_if_t<std::is_constructible<T, U>::value>>
   void value(U&& value) { _value = std::move(value); }
 
-  template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>
-  typename Visitor::return_type accept(std::unique_ptr<Visitor> visitor) { return visitor->visit(std::make_unique<decltype(this)>(this)); }
+  void* accept(code_generator_visitor* visitor) override;
 };
 
 typedef ast_arithmetic<bool> ast_bool;
@@ -60,7 +59,7 @@ typedef ast_uchar ast_uint8;
 typedef ast_arithmetic<signed short> ast_int16;
 typedef ast_arithmetic<unsigned short> ast_uint16;
 typedef ast_arithmetic<signed long> ast_int32;
-typedef ast_arithmetic<unsigned long> ast_uin32;
+typedef ast_arithmetic<unsigned long> ast_uint32;
 typedef ast_arithmetic<signed long long> ast_int64;
 typedef ast_arithmetic<unsigned long long> ast_uint64;
 typedef ast_arithmetic<float> ast_flt32;

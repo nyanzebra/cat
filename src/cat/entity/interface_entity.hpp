@@ -15,7 +15,10 @@ private:
 protected:
 public:
 
-  size_t size() const { assert(_type == type::kINTERFACE && "Size of interface can only work on interfaces"); return _size; }
+  size_t size() const {
+    // assert(_type == type::kINTERFACE && "Size of interface can only work on interfaces"); 
+    return _size;
+  }
 };
 
 } // namespace cat

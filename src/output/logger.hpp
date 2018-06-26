@@ -10,35 +10,38 @@ namespace output {
 //template<typename T, typename = std::enable_if_t<std::is_base_of<std::ostream, T>::value>>
 class logger {
 private:
-  printer _printer;
+  printer _info_printer;
+  printer _debug_printer;
+  printer _warning_printer;
+  printer _error_printer;
 protected:
 public:
 private:
 protected:
 public:
-#ifdef DEBUG
-  logger() : _printer(output_type::kSTANDARD_OUTPUT) {}
-#else
-  logger() : _printer(output_type::kNULL) {}
-#endif
-  logger(output_type type) : _printer(type) {}
-  template<typename U, typename... Args>
-  void debug(U&& msg, Args&&... args) const { _printer.print("[DEBUG]: ", std::move(msg), std::move(args)...); }
-  template<typename U, typename... Args>
-  void info(U&& msg, Args&&... args) const { _printer.print("[INFO]: ", std::move(msg), std::move(args)...); }
-  template<typename U, typename... Args>
-  void error(U&& msg, Args&&... args) const { _printer.print("[ERROR]: ", std::move(msg), std::move(args)...); }
-  template<typename U, typename... Args>
-  void warning(U&& msg, Args&&... args) const { _printer.print("[WARNING]: ", std::move(msg), std::move(args)...); }
-};
+  logger(output_type type) : _warning_printer(type), _error_printer(type), _debug_printer(type), _info_printer(type) {
+    styler s;
+    s.foreground().normalize();
+    s.background().normalize();
+    _info_printer.styler(s);
 
-// template<typename T, typename = std::enable_if_t<std::is_base_of<std::ofstream, T>::value>>
-// using file_logger = base_logger<T>;
-//
-// template<typename T, typename = std::enable_if_t<std::is_base_of<std::ostringstream, T>::value>>
-// using string_logger = base_logger<T>;
-//
-// template<typename T = std::ostream>
-// using logger = base_logger<T>;
+    s.foreground(colour(0, 255, 255));
+    _debug_printer.styler(s);
+
+    s.foreground(colour(255, 255, 0));
+    _warning_printer.styler(s);
+
+    s.foreground(colour(255, 0, 0));
+    _error_printer.styler(s);
+  }
+  template<typename U, typename... Args>
+  void debug(U&& msg, Args&&... args) const { _debug_printer.println("[DEBUG]: ", std::move(msg), std::move(args)...); }
+  template<typename U, typename... Args>
+  void info(U&& msg, Args&&... args) const { _info_printer.println("[INFO]: ", std::move(msg), std::move(args)...); }
+  template<typename U, typename... Args>
+  void error(U&& msg, Args&&... args) const { _error_printer.println("[ERROR]: ", std::move(msg), std::move(args)...); }
+  template<typename U, typename... Args>
+  void warning(U&& msg, Args&&... args) const { _warning_printer.println("[WARNING]: ", std::move(msg), std::move(args)...); }
+};
 
 } // namespace output

@@ -5,7 +5,7 @@ if [[ -e tst/bin ]]; then
 fi
 mkdir tst/bin
 cd tst/bin
-cmake ..
+cmake ../..
 make clean
-make cat ARGS=-V
-./cat;
+make catt ARGS=-V
+tst/catt;

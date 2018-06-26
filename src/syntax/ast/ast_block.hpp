@@ -15,6 +15,7 @@ public:
     stream << '{' << std::endl;
     for (auto it = _expressions.begin(); it != _expressions.end(); ++it) {
       (*it)->print(stream, tabs + 1);
+      //stream << "\n"; not needed?
     }
     stream << '}';
     return stream;
@@ -22,8 +23,9 @@ public:
 
   void add_expression(std::unique_ptr<ast_expression> expr) { _expressions.push_back(std::move(expr)); }
 
-  template<typename Visitor, typename = std::enable_if_t<std::is_member_function_pointer<decltype(&Visitor::visit)>::value>>
-  typename Visitor::return_type accept(std::unique_ptr<Visitor> visitor) { return visitor->visit(std::make_unique<decltype(this)>(this)); }
+  const std::list<std::unique_ptr<ast_expression>>& expressions() const { return _expressions; }
+
+  void* accept(code_generator_visitor* visitor) override;
 };
 
 } // namespace syntax

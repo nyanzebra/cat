@@ -1,6 +1,6 @@
 #pragma once
 
-#include "std.hpp"
+#include "deps/std.hpp"
 
 namespace syntax {
 
