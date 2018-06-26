@@ -35,7 +35,7 @@ public:
 
   const std::unique_ptr<ast_expression>& other() const { return _else; }
 
-  void* accept(code_generator_visitor* visitor, const scope& current_scope) override;
+  void* accept(code_generator_visitor* visitor) override;
 };
 
 } // namespace syntax

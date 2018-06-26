@@ -45,7 +45,7 @@ public:
   template<typename U = std::string, typename = std::enable_if_t<std::is_constructible<std::string, U>::value>>
   void value(U&& value) { _value = std::move(value); }
 
-  void* accept(code_generator_visitor* visitor, const scope& current_scope) override;
+  void* accept(code_generator_visitor* visitor) override;
 };
 
 } // namespace syntax

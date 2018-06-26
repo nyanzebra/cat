@@ -18,7 +18,7 @@ public:
 
   virtual std::ostream& print(std::ostream& stream, size_t tabs = 0) = 0;
 
-  virtual void* accept(code_generator_visitor* visitor, const scope& current_scope) = 0;
+  virtual void* accept(code_generator_visitor* visitor) = 0;
 };
 
 } // namespace syntax

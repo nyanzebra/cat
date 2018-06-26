@@ -48,7 +48,7 @@ public:
   template<typename U = T, typename = std::enable_if_t<std::is_constructible<T, U>::value>>
   void value(U&& value) { _value = std::move(value); }
 
-  void* accept(code_generator_visitor* visitor, const scope& current_scope) override;
+  void* accept(code_generator_visitor* visitor) override;
 };
 
 typedef ast_arithmetic<bool> ast_bool;
@@ -59,7 +59,7 @@ typedef ast_uchar ast_uint8;
 typedef ast_arithmetic<signed short> ast_int16;
 typedef ast_arithmetic<unsigned short> ast_uint16;
 typedef ast_arithmetic<signed long> ast_int32;
-typedef ast_arithmetic<unsigned long> ast_uin32;
+typedef ast_arithmetic<unsigned long> ast_uint32;
 typedef ast_arithmetic<signed long long> ast_int64;
 typedef ast_arithmetic<unsigned long long> ast_uint64;
 typedef ast_arithmetic<float> ast_flt32;

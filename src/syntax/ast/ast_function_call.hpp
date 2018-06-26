@@ -29,7 +29,7 @@ public:
   const std::list<std::unique_ptr<ast_expression>>& args() const { return _args; }
 
 
-  void* accept(code_generator_visitor* visitor, const scope& current_scope) override;
+  void* accept(code_generator_visitor* visitor) override;
 };
 
 } // namespace syntax

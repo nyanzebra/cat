@@ -18,6 +18,6 @@ TEST(code_generator_visitor, generate_basic_main) {
   code_generator_visitor visitor;
   visitor.initialize();
   visitor.create_compile_units(inputs);
-  program->accept(&visitor, {""});
+  program->accept(&visitor);
   visitor.finalize("output");
 }

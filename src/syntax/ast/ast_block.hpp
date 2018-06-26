@@ -25,7 +25,7 @@ public:
 
   const std::list<std::unique_ptr<ast_expression>>& expressions() const { return _expressions; }
 
-  void* accept(code_generator_visitor* visitor, const scope& current_scope) override;
+  void* accept(code_generator_visitor* visitor) override;
 };
 
 } // namespace syntax

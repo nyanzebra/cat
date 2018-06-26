@@ -14,8 +14,6 @@ private:
   typedef std::list<token> token_list;
   typedef token_list::const_iterator token_list_iterator;
 
-  typedef std::stack<scope> scopes;
-  scopes _scopes;
   output::logger _log;
 protected:
 public:
@@ -515,24 +513,6 @@ protected:
   }
 public:
   parser() : _log(output::logger(output::output_type::kSTANDARD_OUTPUT)) {
-    scope global_scope = scope("");
-
-    global_scope.add_public_symbol("auto", "");
-    global_scope.add_public_symbol("bool", "");
-    global_scope.add_public_symbol("char", "");
-    global_scope.add_public_symbol("flt32", "");
-    global_scope.add_public_symbol("flt64", "");
-    global_scope.add_public_symbol("int8", "");
-    global_scope.add_public_symbol("int16", "");
-    global_scope.add_public_symbol("int32", "");
-    global_scope.add_public_symbol("int64", "");
-    global_scope.add_public_symbol("uint8", "");
-    global_scope.add_public_symbol("uint16", "");
-    global_scope.add_public_symbol("uint32", "");
-    global_scope.add_public_symbol("uint64", "");
-    global_scope.add_public_symbol("void", "");
-
-    _scopes.push(global_scope);
   }
 
   std::unique_ptr<ast_program> parse(const std::list<token>& tokens) const {

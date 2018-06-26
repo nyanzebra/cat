@@ -68,7 +68,7 @@ public:
   template<typename U = enum modifiers, typename = std::enable_if_t<std::is_convertible<U, enum modifiers>::value>>
   void modifiers(U&& mods) { _modifiers = std::move(mods); }
 
-  void* accept(code_generator_visitor* visitor, const scope& current_scope) override;
+  void* accept(code_generator_visitor* visitor) override;
 };
 
 } // namespace syntax

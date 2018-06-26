@@ -66,6 +66,20 @@ void code_generator_visitor::initialize() {
   }
 
   _dibuilder = std::make_unique<llvm::DIBuilder>(*_module);
+
+  // base types
+  context::add_typedef("void", llvm::Type::getVoidTy(gCONTEXT));
+  context::add_typedef("bool", llvm::Type::getInt1Ty(gCONTEXT));
+  context::add_typedef("int8", llvm::Type::getInt8Ty(gCONTEXT));
+  context::add_typedef("int16", llvm::Type::getInt16Ty(gCONTEXT));
+  context::add_typedef("int32", llvm::Type::getInt32Ty(gCONTEXT));
+  context::add_typedef("int64", llvm::Type::getInt64Ty(gCONTEXT));
+  context::add_typedef("uint8", llvm::Type::getInt8Ty(gCONTEXT));
+  context::add_typedef("uint16", llvm::Type::getInt16Ty(gCONTEXT));
+  context::add_typedef("uint32", llvm::Type::getInt32Ty(gCONTEXT));
+  context::add_typedef("uint64", llvm::Type::getInt64Ty(gCONTEXT));
+  context::add_typedef("flt32", llvm::Type::getFloatTy(gCONTEXT));
+  context::add_typedef("flt64", llvm::Type::getDoubleTy(gCONTEXT));
 }
 void code_generator_visitor::create_compile_units(const std::list<std::string>& units) {
   bool is_optimized = true;
@@ -105,105 +119,105 @@ void code_generator_visitor::finalize(const std::string& output) {
   out.flush();
 }
 
-llvm::Value* code_generator_visitor::visit(ast_bool* ast, const scope& current_scope) {
+llvm::Value* code_generator_visitor::visit(ast_bool* ast) {
   if (!ast) return nullptr;
   _module->dump();
   std::cout << "ast_bool" <<std::endl;
 
   return llvm::ConstantInt::getSigned(llvm::Type::getInt1Ty(gCONTEXT), ast->value());
 }
-llvm::Value* code_generator_visitor::visit(ast_int8* ast, const scope& current_scope) {
+llvm::Value* code_generator_visitor::visit(ast_int8* ast) {
   if (!ast) return nullptr;
   _module->dump();
   std::cout << "ast_int8" <<std::endl;
 
   return llvm::ConstantInt::getSigned(llvm::Type::getInt8Ty(gCONTEXT), ast->value());
 }
-llvm::Value* code_generator_visitor::visit(ast_uint8* ast, const scope& current_scope) {
+llvm::Value* code_generator_visitor::visit(ast_uint8* ast) {
   if (!ast) return nullptr;
   _module->dump();
   std::cout << "ast_uint8" <<std::endl;
 
   return llvm::ConstantInt::get(llvm::Type::getInt8Ty(gCONTEXT), ast->value());
 }
-llvm::Value* code_generator_visitor::visit(ast_int16* ast, const scope& current_scope) {
+llvm::Value* code_generator_visitor::visit(ast_int16* ast) {
   if (!ast) return nullptr;
   _module->dump();
   std::cout << "ast_int16" <<std::endl;
 
   return llvm::ConstantInt::getSigned(llvm::Type::getInt16Ty(gCONTEXT), ast->value());
 }
-llvm::Value* code_generator_visitor::visit(ast_uint16* ast, const scope& current_scope) {
+llvm::Value* code_generator_visitor::visit(ast_uint16* ast) {
   if (!ast) return nullptr;
   _module->dump();
   std::cout << "ast_uint16" <<std::endl;
 
   return llvm::ConstantInt::get(llvm::Type::getInt16Ty(gCONTEXT), ast->value());
 }
-llvm::Value* code_generator_visitor::visit(ast_int32* ast, const scope& current_scope) {
+llvm::Value* code_generator_visitor::visit(ast_int32* ast) {
   if (!ast) return nullptr;
   _module->dump();
   std::cout << "ast_int32" <<std::endl;
 
   return llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(gCONTEXT), ast->value());
 }
-llvm::Value* code_generator_visitor::visit(ast_uin32* ast, const scope& current_scope) {
+llvm::Value* code_generator_visitor::visit(ast_uint32* ast) {
   if (!ast) return nullptr;
   _module->dump();
   std::cout << "ast_uint32" <<std::endl;
 
   return llvm::ConstantInt::get(llvm::Type::getInt32Ty(gCONTEXT), ast->value());
 }
-llvm::Value* code_generator_visitor::visit(ast_int64* ast, const scope& current_scope) {
+llvm::Value* code_generator_visitor::visit(ast_int64* ast) {
   if (!ast) return nullptr;
   _module->dump();
   std::cout << "ast_int64" <<std::endl;
 
   return llvm::ConstantInt::getSigned(llvm::Type::getInt64Ty(gCONTEXT), ast->value());
 }
-llvm::Value* code_generator_visitor::visit(ast_uint64* ast, const scope& current_scope) {
+llvm::Value* code_generator_visitor::visit(ast_uint64* ast) {
   if (!ast) return nullptr;
   _module->dump();
   std::cout << "ast_uint64" <<std::endl;
 
   return llvm::ConstantInt::get(llvm::Type::getInt64Ty(gCONTEXT), ast->value());
 }
-llvm::Value* code_generator_visitor::visit(ast_flt32* ast, const scope& current_scope) {
+llvm::Value* code_generator_visitor::visit(ast_flt32* ast) {
   if (!ast) return nullptr;
   _module->dump();
   std::cout << "ast_flt32" <<std::endl;
 
   return llvm::ConstantFP::get(llvm::Type::getFloatTy(gCONTEXT), ast->value());
 }
-llvm::Value* code_generator_visitor::visit(ast_flt64* ast, const scope& current_scope) {
+llvm::Value* code_generator_visitor::visit(ast_flt64* ast) {
   if (!ast) return nullptr;
   _module->dump();
   std::cout << "ast_flt64 " << ast->value() <<std::endl;
 
   return llvm::ConstantFP::get(llvm::Type::getDoubleTy(gCONTEXT), ast->value());
 }
-void* code_generator_visitor::visit(ast_arm* ast, const scope& current_scope) {
+void* code_generator_visitor::visit(ast_arm* ast) {
 
   _module->dump();
   std::cout << "ast_arm" <<std::endl;
 
   return nullptr;
 }
-void* code_generator_visitor::visit(ast_assembly* ast, const scope& current_scope) {
+void* code_generator_visitor::visit(ast_assembly* ast) {
 
   _module->dump();
   std::cout << "ast_assembly" <<std::endl;
 
   return nullptr;
 }
-void* code_generator_visitor::visit(ast_binary_operator* ast, const scope& current_scope) {
+void* code_generator_visitor::visit(ast_binary_operator* ast) {
 
   _module->dump();
   std::cout << "ast_binary_operator" <<std::endl;
 
   return nullptr;
 }
-void* code_generator_visitor::visit(ast_block* ast, const scope& current_scope) {
+void* code_generator_visitor::visit(ast_block* ast) {
   if (!ast) {
     std::cout << "block is empty" << std::endl;
   }
@@ -212,7 +226,7 @@ void* code_generator_visitor::visit(ast_block* ast, const scope& current_scope) 
 
   for (auto&& expr : ast->expressions()) {
     if (expr) {
-      if (!expr->accept(this, current_scope)) {
+      if (!expr->accept(this)) {
         return nullptr;
       }
     }
@@ -220,14 +234,14 @@ void* code_generator_visitor::visit(ast_block* ast, const scope& current_scope) 
   // TODO: clean this up, want something better than returning self
   return ast;
 }
-void* code_generator_visitor::visit(ast_for* ast, const scope& current_scope) {
+void* code_generator_visitor::visit(ast_for* ast) {
 
   _module->dump();
   std::cout << "ast_for" <<std::endl;
 
   return nullptr;
 }
-llvm::ReturnInst* code_generator_visitor::visit(ast_return* ast, const scope& current_scope) {
+llvm::ReturnInst* code_generator_visitor::visit(ast_return* ast) {
   if (!ast) {}
   if (!(ast->expression())) {
     return gBUILDER.CreateRetVoid();
@@ -235,9 +249,9 @@ llvm::ReturnInst* code_generator_visitor::visit(ast_return* ast, const scope& cu
   _module->dump();
   std::cout << "ast_return" <<std::endl;
 
-  return gBUILDER.CreateRet((llvm::Value*)ast->expression()->accept(this, current_scope));
+  return gBUILDER.CreateRet((llvm::Value*)ast->expression()->accept(this));
 }
-llvm::Value* code_generator_visitor::visit(ast_function_call* ast, const scope& current_scope) {
+llvm::Value* code_generator_visitor::visit(ast_function_call* ast) {
 
   _module->dump();
   std::cout << "ast_function_call" <<std::endl;
@@ -256,7 +270,7 @@ llvm::Value* code_generator_visitor::visit(ast_function_call* ast, const scope& 
 
   std::vector<llvm::Value*> args;
   for (auto& arg : ast->args()) {
-    args.push_back(static_cast<llvm::Value*>(arg->accept(this, current_scope)));
+    args.push_back(static_cast<llvm::Value*>(arg->accept(this)));
     if (!args.back()) {
       return nullptr;
     }
@@ -264,7 +278,7 @@ llvm::Value* code_generator_visitor::visit(ast_function_call* ast, const scope& 
 
   return gBUILDER.CreateCall(call, args, "calltmp");
 }
-llvm::Function* code_generator_visitor::visit(ast_function_prototype* ast, const scope& current_scope) {
+llvm::Function* code_generator_visitor::visit(ast_function_prototype* ast) {
 
   _module->dump();
   std::cout << "ast_function_prototype" <<std::endl;
@@ -280,12 +294,12 @@ llvm::Function* code_generator_visitor::visit(ast_function_prototype* ast, const
 
   std::vector<llvm::Type*> args(ast->args().size());
   for (const auto& arg : ast->args()) {
-    args.push_back(static_cast<llvm::Type*>(arg->accept(this, current_scope)));
+    args.push_back(static_cast<llvm::Type*>(arg->accept(this)));
   }
   std::cout << "got function types" << std::endl;
   ast_type* resultant = ast->result().get();
   std::cout << "getting function type" << std::endl;
-  llvm::FunctionType* function_type = llvm::FunctionType::get(/*TODO get actual type later*/llvm::Type::getVoidTy(gCONTEXT), args, false);
+  llvm::FunctionType* function_type = llvm::FunctionType::get(context::get_typedef(resultant->name()), args, false);
 
   if (!function_type) {
     // log error?
@@ -310,7 +324,7 @@ llvm::Function* code_generator_visitor::visit(ast_function_prototype* ast, const
 
   return function;
 }
-llvm::Function* code_generator_visitor::visit(ast_function* ast, const scope& current_scope) {
+llvm::Function* code_generator_visitor::visit(ast_function* ast) {
 
   _module->dump();
   std::cout << "ast_function" <<std::endl;
@@ -323,7 +337,7 @@ llvm::Function* code_generator_visitor::visit(ast_function* ast, const scope& cu
   if (!function) {
     // TODO: is this an error?
     std::cout << "no function exists" << std::endl;
-    function = visit(ast->prototype().get(), current_scope);
+    function = visit(ast->prototype().get());
     if (!function) {
       std::cout << "still no function" << std::endl;
     }
@@ -332,7 +346,6 @@ llvm::Function* code_generator_visitor::visit(ast_function* ast, const scope& cu
   llvm::BasicBlock* block = llvm::BasicBlock::Create(gCONTEXT, "entry", function);
   gBUILDER.SetInsertPoint(block);
 
-  scope next_scope(current_scope);
   for (auto& arg : function->args()) {
     // evaluate each expr and get result for calling function
   }
@@ -343,7 +356,7 @@ llvm::Function* code_generator_visitor::visit(ast_function* ast, const scope& cu
     std::cout << "body is nullptr" << std::endl;
   }
 
-  if (body->accept(this, next_scope)) {
+  if (body->accept(this)) {
     std::cout << "verifyFunction" << std::endl;
     llvm::verifyFunction(*function);
 
@@ -353,99 +366,99 @@ llvm::Function* code_generator_visitor::visit(ast_function* ast, const scope& cu
   function->eraseFromParent();
   return nullptr;
 }
-void* code_generator_visitor::visit(ast_if* ast, const scope& current_scope) {
+void* code_generator_visitor::visit(ast_if* ast) {
 
   _module->dump();
   std::cout << "ast_if" <<std::endl;
 
   return nullptr;
 }
-void* code_generator_visitor::visit(ast_match* ast, const scope& current_scope) {
+void* code_generator_visitor::visit(ast_match* ast) {
 
   _module->dump();
   std::cout << "ast_match" <<std::endl;
 
   return nullptr;
 }
-void* code_generator_visitor::visit(ast_meta_class* ast, const scope& current_scope) {
+void* code_generator_visitor::visit(ast_meta_class* ast) {
 
   _module->dump();
   std::cout << "ast_meta_class" <<std::endl;
 
   return nullptr;
 }
-void* code_generator_visitor::visit(ast_meta_interface* ast, const scope& current_scope) {
+void* code_generator_visitor::visit(ast_meta_interface* ast) {
 
   _module->dump();
   std::cout << "ast_meta_interface" <<std::endl;
 
   return nullptr;
 }
-void* code_generator_visitor::visit(ast_pattern* ast, const scope& current_scope) {
+void* code_generator_visitor::visit(ast_pattern* ast) {
 
   _module->dump();
   std::cout << "ast_pattern" <<std::endl;
 
   return nullptr;
 }
-void* code_generator_visitor::visit(ast_program* ast, const scope& current_scope) {
+void* code_generator_visitor::visit(ast_program* ast) {
 
   _module->dump();
   std::cout << "ast_program" <<std::endl;
 
   for (const auto& expr : ast->expressions()) {
-    expr->accept(this, current_scope);
+    expr->accept(this);
   }
   return nullptr;
 }
-void* code_generator_visitor::visit(ast_range* ast, const scope& current_scope) {
+void* code_generator_visitor::visit(ast_range* ast) {
 
   _module->dump();
   std::cout << "ast_range" <<std::endl;
 
   return nullptr;
 }
-void* code_generator_visitor::visit(ast_string* ast, const scope& current_scope) {
+void* code_generator_visitor::visit(ast_string* ast) {
 
   _module->dump();
   std::cout << "ast_string" <<std::endl;
 
   return nullptr;
 }
-void* code_generator_visitor::visit(ast_template* ast, const scope& current_scope) {
+void* code_generator_visitor::visit(ast_template* ast) {
 
   _module->dump();
   std::cout << "ast_template" <<std::endl;
 
   return nullptr;
 }
-void* code_generator_visitor::visit(ast_try* ast, const scope& current_scope) {
+void* code_generator_visitor::visit(ast_try* ast) {
 
   _module->dump();
   std::cout << "ast_try" <<std::endl;
 
   return nullptr;
 }
-llvm::Type* code_generator_visitor::visit(ast_type* ast, const scope& current_scope) {
+llvm::Type* code_generator_visitor::visit(ast_type* ast) {
 
   _module->dump();
   std::cout << "ast_type" <<std::endl;
 
   return nullptr;
 }
-void* code_generator_visitor::visit(ast_unary_operator* ast, const scope& current_scope) {
+void* code_generator_visitor::visit(ast_unary_operator* ast) {
 
   _module->dump();
   std::cout << "ast_unary_operator" <<std::endl;
 
   return nullptr;
 }
-llvm::Value* code_generator_visitor::visit(ast_variable* ast, const scope& current_scope) {
+llvm::Value* code_generator_visitor::visit(ast_variable* ast) {
   if (!ast) return nullptr;
   _module->dump();
-  std::cout << "ast_variable" <<std::endl;
+  std::cout << "ast_variable" << std::endl;
 
-  llvm::Value* value = (llvm::Value*)ast->value()->accept(this, current_scope);
+  llvm::Value* value = (llvm::Value*)ast->value()->accept(this);
   std::cout << ((value != nullptr) ? "got value" : "did not get value") << std::endl;
   auto name = ast->name().c_str();
   std::cout << "variable name: " << ast->name() << std::endl;
@@ -453,11 +466,12 @@ llvm::Value* code_generator_visitor::visit(ast_variable* ast, const scope& curre
   // need to keep this in the scope object!
   llvm::Function* fn = gBUILDER.GetInsertBlock()->getParent();
 
-  auto alloc = llvm::IRBuilder<>(&fn->getEntryBlock(), fn->getEntryBlock().begin()).CreateAlloca( ,nullptr, name);
+  // TODO: use scope to keep track of teh correct types for variables
+  auto alloc = llvm::IRBuilder<>(&fn->getEntryBlock(), fn->getEntryBlock().begin()).CreateAlloca(llvm::Type::getDoubleTy(gCONTEXT),nullptr, name); // need to get TYPE*
   gBUILDER.CreateStore(value, alloc);
   return gBUILDER.CreateLoad(alloc, name);
 }
-void* code_generator_visitor::visit(ast_while* ast, const scope& current_scope) {
+void* code_generator_visitor::visit(ast_while* ast) {
 
   _module->dump();
   std::cout << "ast_while" <<std::endl;

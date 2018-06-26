@@ -20,7 +20,7 @@ public:
 
   const std::unique_ptr<ast_expression>& expression() const { return _expression; }
 
-  void* accept(code_generator_visitor* visitor, const scope& current_scope) override;
+  void* accept(code_generator_visitor* visitor) override;
 };
 
 } // namespace syntax

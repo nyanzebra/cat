@@ -71,61 +71,61 @@ public:
     _module->print(errs(), nullptr);
   }
 
-  static Value* generate(const std::unique_ptr<ast_bool>& ast, const scope& current_scope) {
+  static Value* generate(const std::unique_ptr<ast_bool>& ast) {
     return ConstantInt::getSigned(Type::getInt1Ty(gCONTEXT), ast->value());
   }
-  static Value* generate(const std::unique_ptr<ast_int8>& ast, const scope& current_scope) {
+  static Value* generate(const std::unique_ptr<ast_int8>& ast) {
     return ConstantInt::getSigned(Type::getInt8Ty(gCONTEXT), ast->value());
   }
-  static Value* generate(const std::unique_ptr<ast_uint8>& ast, const scope& current_scope) {
+  static Value* generate(const std::unique_ptr<ast_uint8>& ast) {
     return ConstantInt::get(Type::getInt8Ty(gCONTEXT), ast->value());
   }
-  static Value* generate(const std::unique_ptr<ast_int16>& ast, const scope& current_scope) {
+  static Value* generate(const std::unique_ptr<ast_int16>& ast) {
     return ConstantInt::getSigned(Type::getInt16Ty(gCONTEXT), ast->value());
   }
-  static Value* generate(const std::unique_ptr<ast_uint16>& ast, const scope& current_scope) {
+  static Value* generate(const std::unique_ptr<ast_uint16>& ast) {
     return ConstantInt::get(Type::getInt16Ty(gCONTEXT), ast->value());
   }
-  static Value* generate(const std::unique_ptr<ast_int32>& ast, const scope& current_scope) {
+  static Value* generate(const std::unique_ptr<ast_int32>& ast) {
     return ConstantInt::getSigned(Type::getInt32Ty(gCONTEXT), ast->value());
   }
-  static Value* generate(const std::unique_ptr<ast_uin32>& ast, const scope& current_scope) {
+  static Value* generate(const std::unique_ptr<ast_uint32>& ast) {
     return ConstantInt::get(Type::getInt32Ty(gCONTEXT), ast->value());
   }
-  static Value* generate(const std::unique_ptr<ast_int64>& ast, const scope& current_scope) {
+  static Value* generate(const std::unique_ptr<ast_int64>& ast) {
     return ConstantInt::getSigned(Type::getInt64Ty(gCONTEXT), ast->value());
   }
-  static Value* generate(const std::unique_ptr<ast_uint64>& ast, const scope& current_scope) {
+  static Value* generate(const std::unique_ptr<ast_uint64>& ast) {
     return ConstantInt::get(Type::getInt64Ty(gCONTEXT), ast->value());
   }
-  static Value* generate(const std::unique_ptr<ast_flt32>& ast, const scope& current_scope) {
+  static Value* generate(const std::unique_ptr<ast_flt32>& ast) {
     return ConstantInt::get(Type::getFloatTy(gCONTEXT), ast->value());
   }
-  static Value* generate(const std::unique_ptr<ast_flt64>& ast, const scope& current_scope) {
+  static Value* generate(const std::unique_ptr<ast_flt64>& ast) {
     return ConstantInt::get(Type::getDoubleTy(gCONTEXT), ast->value());
   }
-  static void generate(const std::unique_ptr<ast_arm>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_arm>& ast) const {
 
   }
-  static void generate(const std::unique_ptr<ast_assembly>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_assembly>& ast) const {
 
   }
-  static void generate(const std::unique_ptr<ast_binary_operator>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_binary_operator>& ast) const {
 
   }
-  static Value* generate(const std::unique_ptr<ast_block>& ast, const scope& current_scope) const {
+  static Value* generate(const std::unique_ptr<ast_block>& ast) const {
     return nullptr;
   }
-  static void generate(const std::unique_ptr<ast_conditional>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_conditional>& ast) const {
 
   }
-  static void generate(const std::unique_ptr<ast_expression>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_expression>& ast) const {
 
   }
-  static void generate(const std::unique_ptr<ast_for>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_for>& ast) const {
 
   }
-  static Value* generate(const std::unique_ptr<ast_function_call>& ast, const scope& current_scope) const {
+  static Value* generate(const std::unique_ptr<ast_function_call>& ast) const {
     Function* call = _module->getFunction(ast->callee());
 
     if (!call) {
@@ -140,7 +140,7 @@ public:
 
     std::vector<Value*> args;
     for (auto& arg : ast->args()) {
-      args.push_back(visit(arg, current_scope));
+      args.push_back(visit(arg));
       if (!args.back()) {
         return nullptr;
       }
@@ -148,10 +148,10 @@ public:
 
     return gBUILDER.CreateCall(call, args, "calltmp");
   }
-  static Function* generate(const std::unique_ptr<ast_function_prototype>& ast, const scope& current_scope) const {
+  static Function* generate(const std::unique_ptr<ast_function_prototype>& ast) const {
     std::vector<Type*> args(ast->args().size());
     for (const auto& arg : ast->args()) {
-      args.push_back(visit(arg, current_scope));
+      args.push_back(visit(arg));
     }
 
     auto resultant = std::move(ast->result());
@@ -178,7 +178,7 @@ public:
 
     return function;
   }
-  static Function* generate(const std::unique_ptr<ast_function>& ast, const scope& current_scope) const {
+  static Function* generate(const std::unique_ptr<ast_function>& ast) const {
     Function* function = _module->getFunction(ast->prototype()->name());
 
     if (!function) {
@@ -188,12 +188,11 @@ public:
     BasicBlock* block = BasicBlock::Create(gCONTEXT, "entry", function);
     gBUILDER.SetInsertPoint(block);
 
-    scope next_scope(current_scope);
     for (auto& arg : function->args()) {
 
     }
 
-    if (Value* result = generate(ast->body(), next_scope)) {
+    if (Value* result = generate(ast->body())) {
       gBUILDER.CreateRet(result);
 
       verifyFunction(*function);
@@ -204,51 +203,51 @@ public:
     function->eraseFromParent();
     return nullptr;
   }
-  static void generate(const std::unique_ptr<ast_if>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_if>& ast) const {
 
   }
-  static void generate(const std::unique_ptr<ast_match>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_match>& ast) const {
 
   }
-  static void generate(const std::unique_ptr<ast_meta_class>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_meta_class>& ast) const {
 
   }
-  static void generate(const std::unique_ptr<ast_meta_interface>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_meta_interface>& ast) const {
 
   }
-  static void generate(const std::unique_ptr<ast_node>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_node>& ast) const {
 
   }
-  static void generate(const std::unique_ptr<ast_pattern>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_pattern>& ast) const {
 
   }
-  static void generate(const std::unique_ptr<ast_program>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_program>& ast) const {
     for (const auto& expr : ast->expressions()) {
-      visit(expr, current_scope);
+      visit(expr);
     }
   }
-  static void generate(const std::unique_ptr<ast_range>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_range>& ast) const {
 
   }
-  static void generate(const std::unique_ptr<ast_string>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_string>& ast) const {
 
   }
-  static void generate(const std::unique_ptr<ast_template>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_template>& ast) const {
 
   }
-  static void generate(const std::unique_ptr<ast_try>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_try>& ast) const {
 
   }
-  static Type* generate(const std::unique_ptr<ast_type>& ast, const scope& current_scope) const {
+  static Type* generate(const std::unique_ptr<ast_type>& ast) const {
     return nullptr;
   }
-  static void generate(const std::unique_ptr<ast_unary_operator>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_unary_operator>& ast) const {
 
   }
-  static void generate(const std::unique_ptr<ast_variable>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_variable>& ast) const {
 
   }
-  static void generate(const std::unique_ptr<ast_while>& ast, const scope& current_scope) const {
+  static void generate(const std::unique_ptr<ast_while>& ast) const {
 
   }
 }; // class generateor

@@ -77,7 +77,7 @@ int main(int argc, char const *argv[]) {
   std::cout << "compiling" << std::endl;
   visitor.create_compile_units(inputs);
   std::cout << "compiling units" << std::endl;
-  program->accept(&visitor, {""});
+  program->accept(&visitor);
   std::cout << "finalize compiling" << std::endl;
   visitor.finalize(output);
   std::cout << "finished compiling" << std::endl;

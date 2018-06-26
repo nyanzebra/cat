@@ -27,7 +27,7 @@ public:
   const std::unique_ptr<ast_function_prototype>& prototype() const { return _prototype; }
   const std::unique_ptr<ast_block>& body() const { return _body; }
 
-  void* accept(code_generator_visitor* visitor, const scope& current_scope) override;
+  void* accept(code_generator_visitor* visitor) override;
 };
 
 } // namespace syntax

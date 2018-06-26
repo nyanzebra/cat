@@ -3,9 +3,9 @@
 
 namespace syntax {
 
-void* ast_if::accept(code_generator_visitor* visitor, const scope& current_scope) {
+void* ast_if::accept(code_generator_visitor* visitor) {
 
-  return visitor->visit(this, current_scope);
+  return visitor->visit(this);
 }
 
 } // namespace syntax

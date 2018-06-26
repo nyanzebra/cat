@@ -4,9 +4,9 @@
 namespace syntax {
 
 template <typename T>
-void* ast_arithmetic<T>::accept(code_generator_visitor* visitor, const scope& current_scope) {
+void* ast_arithmetic<T>::accept(code_generator_visitor* visitor) {
 
-  return visitor->visit(this, current_scope);
+  return visitor->visit(this);
 }
 
 template class ast_arithmetic<bool>;

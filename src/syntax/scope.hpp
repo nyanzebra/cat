@@ -5,76 +5,63 @@
 
 namespace syntax {
 
+enum class scope : char {
+  kPRIVATE,
+  kPROTECTED,
+  kPUBLIC
+};
+
 class scoped_variable {
 private:
-  std::string _name;
-  std::string _scope;
-  std::optional<llvm::Value> _value;
+  scope _scope;
+  llvm::AllocaInst* _value;
 protected:
 public:
 private:
 protected:
 public:
-}
+  scoped_variable(enum scope scope, llvm::AllocaInst* value) : _scope(scope), _value(value) {}
 
-class scope {
+  const scope& scope() const { return _scope; }
+  void scope(const enum scope& value) { _scope = value; }
+  void scope(enum scope&& value) { _scope = std::move(value); }
+
+  const llvm::AllocaInst* value() const { return _value; }
+  void value(llvm::AllocaInst* value) { _value = value; }
+};
+// map of aliases from a module name to a module i.e. use ... as ...
+// or perhaps like rust http://www.suspectsemantics.com/blog/2016/05/26/rust-modules-and-file-hierarchy/
+
+// should have a map of strings that represent valid symbols to their scope (public, protected, private)
+// should have a current scope
+
+//symbol name will be of form module-A:module-B:module-...:<class/function>-A:variable-<actual name>
+class context {
 private:
-  std::string _module;
-  std::unordered_multimap<,>
-  std::unordered_map<std::string, std::string> _public_symbols;
-  std::unordered_map<std::string, std::string> _protected_symbols;
-  std::unordered_map<std::string, std::string> _private_symbols;
+  static std::unordered_map<std::string, scoped_variable> _symbols;
+  static std::unordered_map<std::string, llvm::Type*> _typedefs;
 protected:
 public:
 private:
 protected:
 public:
-  template<typename T = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
-  scope(T&& module) : _module(std::move(module)) {}
-  scope(const scope& other) { _public_symbols = other._public_symbols; }
-  scope(scope&& other) { _public_symbols = std::move(other._public_symbols); }
+  static bool has_symbol(const std::string& key);
+  static bool has_symbol(std::string&& key);
+  static void remove_symbol(const std::string& key);
+  static void remove_symbol(std::string&& key);
+  static void add_symbol(const std::string& key, const scoped_variable& value);
+  static void add_symbol(std::string&& key, scoped_variable&& value);
+  static const scoped_variable& get_symbol(const std::string& key);
+  static const scoped_variable& get_symbol(std::string&& key);
 
-  scope& operator=(const scope& other) { _public_symbols = other._public_symbols; return *this; }
-  scope& operator=(scope&& other) { _public_symbols = std::move(other._public_symbols); return *this; }
-
-  template<typename T = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
-  bool has_public_symbol(const T& key) { return _public_symbols.find(key) != _public_symbols.end(); }
-  template<typename T = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
-  bool has_public_symbol(T&& key) { return _public_symbols.find(std::move(key)) != _public_symbols.end(); }
-  template<typename T = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
-  void remove_public_symbol(const T& key) { return _public_symbols.erase(key); }
-  template<typename T = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
-  void remove_public_symbol(T&& key) { return _public_symbols.erase(std::move(key)); }
-  template<typename T = std::string, typename U = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value && std::is_constructible<std::string, U>::value>>
-  void add_public_symbol(const T& key, const U& value) { _public_symbols.emplace(key, value); }
-  template<typename T = std::string, typename U = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value && std::is_constructible<std::string, U>::value>>
-  void add_public_symbol(T&& key, U&& value) { _public_symbols.emplace(std::move(key), std::move(value)); }
-
-  template<typename T = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
-  bool has_protected_symbol(const T& key) { return _protected_symbols.find(key) != _protected_symbols.end(); }
-  template<typename T = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
-  bool has_protected_symbol(T&& key) { return _protected_symbols.find(std::move(key)) != _protected_symbols.end(); }
-  template<typename T = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
-  void remove_protected_symbol(const T& key) { return _protected_symbols.erase(key); }
-  template<typename T = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
-  void remove_protected_symbol(T&& key) { return _protected_symbols.erase(std::move(key)); }
-  template<typename T = std::string, typename U = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value && std::is_constructible<std::string, U>::value>>
-  void add_protected_symbol(const T& key, const U& value) { _protected_symbols.emplace(key, value); }
-  template<typename T = std::string, typename U = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value && std::is_constructible<std::string, U>::value>>
-  void add_protected_symbol(T&& key, U&& value) { _protected_symbols.emplace(std::move(key), std::move(value)); }
-
-  template<typename T = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
-  bool has_private_symbol(const T& key) { return _private_symbols.find(key) != _private_symbols.end(); }
-  template<typename T = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
-  bool has_private_symbol(T&& key) { return _private_symbols.find(std::move(key)) != _private_symbols.end(); }
-  template<typename T = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
-  void remove_private_symbol(const T& key) { return _private_symbols.erase(key); }
-  template<typename T = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
-  void remove_private_symbol(T&& key) { return _private_symbols.erase(std::move(key)); }
-  template<typename T = std::string, typename U = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value && std::is_constructible<std::string, U>::value>>
-  void add_private_symbol(const T& key, const U& value) { _private_symbols.emplace(key, value); }
-  template<typename T = std::string, typename U = std::string, typename = std::enable_if_t<std::is_constructible<std::string, T>::value && std::is_constructible<std::string, U>::value>>
-  void add_private_symbol(T&& key, U&& value) { _private_symbols.emplace(std::move(key), std::move(value)); }
+  static bool has_typedef(const std::string& key);
+  static bool has_typedef(std::string&& key);
+  static void remove_typedef(const std::string& key);
+  static void remove_typedef(std::string&& key);
+  static void add_typedef(const std::string& key, llvm::Type* value);
+  static void add_typedef(std::string&& key, llvm::Type* value);
+  static llvm::Type* get_typedef(const std::string& key);
+  static llvm::Type* get_typedef(std::string&& key);
 };
 
 } // namespace syntax
